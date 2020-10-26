@@ -6,7 +6,7 @@
   <link href="https://youthfuever.github.io/atom.xml" rel="self"/>
   
   <link href="https://youthfuever.github.io/"/>
-  <updated>2020-10-26T14:03:26.292Z</updated>
+  <updated>2020-10-26T14:36:55.000Z</updated>
   <id>https://youthfuever.github.io/</id>
   
   <author>
@@ -21,7 +21,7 @@
     <link href="https://youthfuever.github.io/2020/10/26/%E7%AC%AC%E4%B8%80%E7%AF%87%E5%8D%9A%E5%AE%A2/"/>
     <id>https://youthfuever.github.io/2020/10/26/%E7%AC%AC%E4%B8%80%E7%AF%87%E5%8D%9A%E5%AE%A2/</id>
     <published>2020-10-26T09:59:02.000Z</published>
-    <updated>2020-10-26T14:03:26.292Z</updated>
+    <updated>2020-10-26T14:36:55.000Z</updated>
     
     
       
@@ -37,7 +37,9 @@
     <category term="博客" scheme="https://youthfuever.github.io/categories/%E5%8D%9A%E5%AE%A2/"/>
     
     
-    <category term="博客,GitHub" scheme="https://youthfuever.github.io/tags/%E5%8D%9A%E5%AE%A2-GitHub/"/>
+    <category term="博客" scheme="https://youthfuever.github.io/tags/%E5%8D%9A%E5%AE%A2/"/>
+    
+    <category term="GitHub" scheme="https://youthfuever.github.io/tags/GitHub/"/>
     
   </entry>
   
