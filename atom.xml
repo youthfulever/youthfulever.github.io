@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+  <title>晏然_</title>
+  
+  <subtitle>云想衣裳花想容,春风拂槛露华浓。</subtitle>
+  <link href="https://youthfuever.github.io/atom.xml" rel="self"/>
+  
+  <link href="https://youthfuever.github.io/"/>
+  <updated>2020-10-26T09:59:25.633Z</updated>
+  <id>https://youthfuever.github.io/</id>
+  
+  <author>
+    <name>Zhang Qionngui</name>
+    
+  </author>
+  
+  <generator uri="https://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>第一篇博客</title>
+    <link href="https://youthfuever.github.io/2020/10/26/%E7%AC%AC%E4%B8%80%E7%AF%87%E5%8D%9A%E5%AE%A2/"/>
+    <id>https://youthfuever.github.io/2020/10/26/%E7%AC%AC%E4%B8%80%E7%AF%87%E5%8D%9A%E5%AE%A2/</id>
+    <published>2020-10-26T09:59:02.000Z</published>
+    <updated>2020-10-26T09:59:25.633Z</updated>
+    
+    
+      
+      
+        
+        
+    <summary type="html">&lt;p&gt;#　很早以前就搭建了本博客，当时仅采用hexo+github，然后博客加载速度很慢，就没再去管理，而后看到&lt;a href=&quot;https://www.baifan97.cn/&quot; target=&quot;_blank&quot;</summary>
+        
+      
+    
+    
+    
+    
+  </entry>
+  
+</feed>
