@@ -186,145 +186,21 @@
      
     <div class="article-meta">
       <a href="/2020/11/10/%E7%88%AC%E8%99%AB%E6%89%B9%E9%87%8F%E4%B8%8B%E8%BD%BD%E6%97%A0%E6%B0%B4%E5%8D%B0%E6%8A%96%E9%9F%B3%E8%A7%86%E9%A2%91%E5%92%8C%E7%94%A8%E6%88%B7%E4%B8%BB%E9%A1%B5%E5%85%A8%E9%83%A8%E8%A7%86%E9%A2%91/" class="article-date">
-  <time datetime="2020-11-10T06:17:50.710Z" itemprop="datePublished">2020-11-10</time>
-</a>    
+  <time datetime="2020-11-10T06:17:50.000Z" itemprop="datePublished">2020-11-10</time>
+</a> 
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/%E7%88%AC%E8%99%AB/">爬虫</a>
+  </div>
+   
     </div>
       
     <div class="article-entry" itemprop="articleBody">
        
-  <hr>
-<p>title: 爬虫批量下载无水印抖音视频和用户主页全部视频<br>date: 2020-11-10 14:17:50<br>[]:<br>            i = i + 1<br>            print(‘—正在第 {} 次尝试…\r’.format(str(i)))<br>            user_url = user_url_prefix + ‘/?sec_uid=%s&amp;count=2000’ % (sec_uid)<br>            response = self.get_request(user_url)<br>            html = json.loads(response.content.decode())</p>
-<pre><code>        if html[&apos;aweme_list&apos;] != []:
-
-            result = html[&apos;aweme_list&apos;]
-
-    nickname = None
-    video_list = []
-    for item in result:
-        if nickname is None:
-            nickname = item[&apos;author&apos;][&apos;nickname&apos;] if re.sub(r&apos;[\/:*?&quot;&lt;&gt;|]&apos;, &apos;&apos;, item[&apos;author&apos;][&apos;nickname&apos;]) else None
-
-        video_list.append({
-            &apos;desc&apos;: re.sub(r&apos;[\/:*?&quot;&lt;&gt;|]&apos;, &apos;&apos;, item[&apos;desc&apos;]) if item[&apos;desc&apos;] else &apos;无标题&apos; + str(int(time.time())),
-            &apos;url&apos;: item[&apos;video&apos;][&apos;play_addr&apos;][&apos;url_list&apos;][0]
-        })
-    return nickname, video_list
-
-def get_download_url(self, video_url, watermark_flag):
-    &apos;&apos;&apos;
-    Whether to download watermarked videos
-    :param video_url: the url of video
-    :param watermark_flag: the type of video
-    :return: the url of o
-    &apos;&apos;&apos;
-    if watermark_flag == True:
-        download_url = video_url.replace(&apos;api.amemv.com&apos;, &apos;aweme.snssdk.com&apos;)
-    else:
-        download_url = video_url.replace(&apos;aweme.snssdk.com&apos;, &apos;api.amemv.com&apos;)
-
-    return download_url
-
-def video_downloader(self, video_url, video_name, watermark_flag=False):
-    &apos;&apos;&apos;
-    Download the video
-    :param video_url: the url of video
-    :param video_name: the name of video
-    :param watermark_flag: the flag of video
-    :return: None
-    &apos;&apos;&apos;
-    size = 0
-    video_url = self.get_download_url(video_url, watermark_flag=watermark_flag)
-    with closing(requests.get(video_url, headers=self.headers, stream=True)) as response:
-        chunk_size = 1024
-        content_size = int(response.headers[&apos;content-length&apos;])
-        if response.status_code == 200:
-            sys.stdout.write(&apos;----[文件大小]:%0.2f MB\n&apos; % (content_size / chunk_size / 1024))
-
-            with open(video_name + &apos;.mp4&apos;, &apos;wb&apos;) as file:
-                for data in response.iter_content(chunk_size=chunk_size):
-                    file.write(data)
-                    size += len(data)
-                    file.flush()
-
-                    sys.stdout.write(&apos;----[下载进度]:%.2f%%&apos; % float(size / content_size * 100) + &apos;\r&apos;)
-                    sys.stdout.flush()
-
-@retry(stop_max_attempt_number=3)
-def get_request(self, url, params=None):
-    &apos;&apos;&apos;
-    Send a get request
-    :param url: the url of request
-    :param params: the params of request
-    :return: the result of request
-    &apos;&apos;&apos;
-    if params is None:
-        params = {}
-    response = requests.get(url, params=params, headers=self.headers, timeout=10)
-    assert response.status_code == 200
-    return response
-
-@retry(stop_max_attempt_number=3)
-def post_request(self, url, data=None):
-    &apos;&apos;&apos;
-    Send a post request
-    :param url: the url of request
-    :param data: the params of request
-    :return: the result of request
-    &apos;&apos;&apos;
-    if data is None:
-        data = {}
-    response = requests.post(url, data=data, headers=self.headers, timeout=10)
-    assert response.status_code == 200
-    return response
-
-def run(self):
-    &apos;&apos;&apos;
-    Program entry
-    &apos;&apos;&apos;
-    urls=input(&apos;请输入用户主页链接（可以带汉字）:&apos;)
-    video_list = re.findall(r&apos;(https://v.douyin.com/.*?/)&apos;, urls)[0]
-    headers = {&apos;user-agent&apos;: &apos;Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/63.0.3239.26 Safari/537.36 Core/1.63.5558.400 QQBrowser/10.1.1695.400&apos;, }
-    response = requests.get(url=video_list, headers=headers, allow_redirects=False)
-    sec_uid = re.findall(r&apos;uid=(.*?)&amp;&apos;, response.headers[&apos;location&apos;])[0]
-    sec_uid = sec_uid if sec_uid else &apos;MS4wLjABAAAAle_oORaZCgYlB84cLTKSqRFvDgGmgrJsS6n3TfwxonM&apos;
-
-    watermark_flag = input(&apos;是否下载带水印的视频 (0-否(默认), 1-是):&apos;)
-    watermark_flag = bool(int(watermark_flag)) if watermark_flag else 0
-
-    type_flag = input(&apos;p-上传的(默认), l-收藏的:&apos;)
-    type_flag = type_flag if type_flag else &apos;p&apos;
-
-    save_dir = input(&apos;保存路径 (默认&quot;./Download/&quot;):&apos;)
-    save_dir = save_dir if save_dir else &quot;./Download/&quot;
-
-    nickname, video_list = self.get_video_urls(sec_uid, type_flag)
-    nickname_dir = os.path.join(save_dir, nickname)
-
-    if not os.path.exists(nickname_dir):
-        os.makedirs(nickname_dir)
-
-    if type_flag == &apos;f&apos;:
-        if &apos;favorite&apos; not in os.listdir(nickname_dir):
-            os.mkdir(os.path.join(nickname_dir, &apos;favorite&apos;))
-
-    print(&apos;---视频下载中: 共有%d个作品...\r&apos; % len(video_list))
-
-    for num in range(len(video_list)):
-        print(&apos;---正在解析第%d个视频链接 [%s] 中，请稍后...\n&apos; % (num + 1, video_list[num][&apos;desc&apos;]))
-
-        video_path = os.path.join(nickname_dir, video_list[num][&apos;desc&apos;]) if type_flag != &apos;f&apos; else os.path.join(nickname_dir, &apos;favorite&apos;, video_list[num][&apos;desc&apos;])
-        if os.path.isfile(video_path):
-            print(&apos;---视频已存在...\r&apos;)
-        else:
-            self.video_downloader(video_list[num][&apos;url&apos;], video_path, watermark_flag)
-        print(&apos;\n&apos;)
-    print(&apos;---下载完成...\r&apos;)
-
-if __name__ == &quot;__main__&quot;:
-DouYin().hello().run()</code></pre><p>实现界面：<a href="https://blog.csdn.net/Python_sn/article/details/108951267" target="_blank" rel="noopener">参考博客2</a><br><img src="https://i.loli.net/2020/11/10/KlSI1tmCvDN7w4s.jpg" alt="实现界面2.jpg"></p>
-<hr>
-<p><strong>结：</strong><br>&emsp;&emsp;基本完成任务，不过由于时间学习不足，只搞懂了第一个爬虫原理和实现方法，第二个也只是浅显的理解小部分方法的实现，在本学期学了机器学习这门课加之此次爬虫经历，python这门语言确实方便和深厚，不枉有人来这么一句“python是世界上最好的语言”。下次更博不知道什么时候，不过估计更新的通过JavaScript实现最短路径导航，算法的期末作业。</p>
- 
+  <p>&emsp;&emsp;前段时间进行自媒体视频搬运，需要下载无水印的抖音视频，于是在网上找资源，确实找到了一些网页或小程序，但几乎都存在一些问题，比如下载速度慢，只能单链接下载，下载次数有限制，于是花了一个星期开始了爬虫的学习，找到了与抖音视频下载有关的爬虫博客进行借鉴，弄清了实现原理，分别进行了修改。 
+      <a class="article-more-link" href="/2020/11/10/%E7%88%AC%E8%99%AB%E6%89%B9%E9%87%8F%E4%B8%8B%E8%BD%BD%E6%97%A0%E6%B0%B4%E5%8D%B0%E6%8A%96%E9%9F%B3%E8%A7%86%E9%A2%91%E5%92%8C%E7%94%A8%E6%88%B7%E4%B8%BB%E9%A1%B5%E5%85%A8%E9%83%A8%E8%A7%86%E9%A2%91/"
+        >阅读更多...</a
+      >
+       
       <!-- reward -->
       
     </div>
@@ -334,6 +210,8 @@ DouYin().hello().run()</code></pre><p>实现界面：<a href="https://blog.csdn.
     
     <footer class="article-footer">
        
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/python/" rel="tag">python</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E7%88%AC%E8%99%AB/" rel="tag">爬虫</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E8%87%AA%E5%AA%92%E4%BD%93/" rel="tag">自媒体</a></li></ul>
+
     </footer>
   </div>
 

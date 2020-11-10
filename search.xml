@@ -3,9 +3,110 @@
   <entry>
     <title>爬虫批量下载无水印抖音视频和用户主页全部视频</title>
     <url>/2020/11/10/%E7%88%AC%E8%99%AB%E6%89%B9%E9%87%8F%E4%B8%8B%E8%BD%BD%E6%97%A0%E6%B0%B4%E5%8D%B0%E6%8A%96%E9%9F%B3%E8%A7%86%E9%A2%91%E5%92%8C%E7%94%A8%E6%88%B7%E4%B8%BB%E9%A1%B5%E5%85%A8%E9%83%A8%E8%A7%86%E9%A2%91/</url>
-    <content><![CDATA[<hr>
-<p>title: 爬虫批量下载无水印抖音视频和用户主页全部视频<br>date: 2020-11-10 14:17:50<br>[]:<br>            i = i + 1<br>            print(‘—正在第 {} 次尝试…\r’.format(str(i)))<br>            user_url = user_url_prefix + ‘/?sec_uid=%s&amp;count=2000’ % (sec_uid)<br>            response = self.get_request(user_url)<br>            html = json.loads(response.content.decode())</p>
-<pre><code>        if html[&apos;aweme_list&apos;] != []:
+    <content><![CDATA[<p>&emsp;&emsp;前段时间进行自媒体视频搬运，需要下载无水印的抖音视频，于是在网上找资源，确实找到了一些网页或小程序，但几乎都存在一些问题，比如下载速度慢，只能单链接下载，下载次数有限制，于是花了一个星期开始了爬虫的学习，找到了与抖音视频下载有关的爬虫博客进行借鉴，弄清了实现原理，分别进行了修改。<a id="more"></a><br><strong>一：批量下载抖音视频</strong><br>&emsp;&emsp;修改第一个单链接下载抖音视频，使单链接下载变成了多链接下载，并且可以带有汉字，可以一次输入多个链接。<br>代码如下：</p>
+<pre><code>import requests
+from requests import get
+import re
+import datetime
+import os
+def download_video(shrot_video_url,count): 
+# 电脑UA访问短链接，通过302重定向时response.headers中的location标签获取视频id号
+headers = {&apos;user-agent&apos;: &apos;Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/63.0.3239.26 Safari/537.36 Core/1.63.5558.400 QQBrowser/10.1.1695.400&apos;, }
+response = requests.get(url=shrot_video_url, headers=headers, allow_redirects=False)
+items_ids = re.findall(r&apos;video/(.*?)/&apos;, response.headers[&apos;location&apos;])[0]
+# 电脑UA访问官方api视频分享接口，获取视频播放链接，通过替换 playwm 为 play 后，得到无水印的视频播放连接
+url = &apos;https://www.iesdouyin.com/web/api/v2/aweme/iteminfo/?item_ids={}&apos;.format(items_ids)
+headers = {&apos;user-agent&apos;: &apos;Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36&apos;, }
+response = requests.get(url=url, headers=headers)
+play_addr = response.json().get(&apos;item_list&apos;)[0][&apos;video&apos;][&apos;play_addr&apos;][&apos;url_list&apos;][0]
+play_addr_nowm = str(play_addr).replace(&apos;playwm&apos;, &apos;play&apos;)
+playname=response.json().get(&apos;item_list&apos;)[0][&apos;desc&apos;]
+
+# 手机UA访问无水印的视频播放链接，经过302重定向后，获取无水印视频播放真实链接 （注意：此处若使用电脑UA则获取不到任何数据）
+headers = {&apos;user-agent&apos;: &apos;Mozilla/5.0 (iPhone; CPU iPhone OS 13_2_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.3 Mobile/15E148 Safari/604.1&apos;, }
+response = requests.get(url=play_addr_nowm, headers=headers, allow_redirects=False)
+real_play_addr_nowm = response.headers[&apos;location&apos;]
+
+
+
+# 手机UA访问，下载视频 （注意：此处若使用电脑UA则获取不到任何数据）
+headers = {
+    &apos;user-agent&apos;: &apos;Mozilla/5.0 (iPhone; CPU iPhone OS 13_2_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.3 Mobile/15E148 Safari/604.1&apos;,
+    &apos;Connection&apos;: &apos;keep-alive&apos;,
+    &apos;Host&apos;: &apos;v5-dy-d.ixigua.com&apos;
+}
+r = requests.get(url=real_play_addr_nowm, headers=headers, stream=True)
+
+# 下载视频
+today=datetime.datetime.now().strftime(&apos;%Y-%m-%d&apos;)
+if not os.path.exists(&apos;./{}&apos;.format(today)):
+    os.mkdir(&apos;./{}&apos;.format(today))
+
+with open(&apos;./{}/{}.mp4&apos;.format(today, playname), &quot;wb&quot;) as mp4:
+    for chunk in r.iter_content(chunk_size=1024 * 1024):
+        if chunk:
+            mp4.write(chunk)
+
+print(&quot;第%d个下载成功&quot;%count)
+
+if __name__ == &apos;__main__&apos;:
+count=1
+# 单个视频分享页————下载无水印视频
+urls=input(&apos;请输入多个链接（可以带汉字）:&apos;)
+video_list = re.findall(r&apos;(http.*?) &apos;, urls)
+
+
+for j in video_list:
+    download_video(j,count)
+    count=count+1;</code></pre><p>实现界面：<a href="https://blog.csdn.net/Python_sn/article/details/109358372?ops_request_misc=%257B%2522request%255Fid%2522%253A%2522160497764019725266900315%2522%252C%2522scm%2522%253A%252220140713.130102334.pc%255Fblog.%2522%257D&request_id=160497764019725266900315&biz_id=0&utm_medium=distribute.pc_search_result.none-task-blog-2~blog~first_rank_v1~rank_blog_v1-6-109358372.pc_v1_rank_blog_v1&utm_term=%E6%8A%96%E9%9F%B3&spm=1018.2118.3001.4450" target="_blank" rel="noopener">参考博客1</a><br><img src="https://i.loli.net/2020/11/10/GrwdfqoxF56LmbW.jpg" alt="实现界面.jpg"><br><strong>二：下载用户主页全部视频</strong><br>修改第二个下载抖音用户全部视频，由原来用户输入sec_id变成了用户直接输入主页链接就可以了，原来输入sec_id情况，对于没有爬虫和网页基础的人很难找到sec_id。不过原博就存在一个问题，其实并不是下载全部视频，大约三十个左右。分析了一遍代码也没找到哪里的问题，估计是抖音用特殊方法处理了。<br>实现代码：</p>
+<pre><code>import os, sys, requests
+import json, re, time
+from retrying import retry
+from contextlib import closing
+class DouYin: 
+def __init__(self):
+    self.headers = {
+        &apos;accept&apos;: &apos;text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9&apos;,
+        &apos;accept-language&apos;: &apos;zh-CN,zh;q=0.9,en;q=0.8&apos;,
+        &apos;pragma&apos;: &apos;no-cache&apos;,
+        &apos;cache-control&apos;: &apos;no-cache&apos;,
+        &apos;upgrade-insecure-requests&apos;: &apos;1&apos;,
+        &apos;User-Agent&apos;: &apos;Mozilla/5.0 (iPhone; CPU iPhone OS 13_2_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.3 Mobile/15E148 Safari/604.1&apos;,
+    }
+
+def hello(self):
+    &apos;&apos;&apos;
+    This is welcome speech
+    :return: self
+    &apos;&apos;&apos;
+    print(&quot;*&quot; * 50)
+    print(&apos; &apos; * 15 + &apos;抖音下载小助手&apos;)
+    print(&apos; &apos; * 5 + &apos;作者: Felix  Date: 2020-05-20 13:14&apos;)
+    print(&apos; &apos; * 15 + &apos;无水印 | 有水印&apos;)
+    print(&apos; &apos; * 12 + &apos;输入用户主页链接即可&apos;)
+    print(&apos; &apos; * 2 + &apos;用浏览器打开用户分享链接，复制参数中sec_uid&apos;)
+    print(&quot;*&quot; * 50)
+    return self
+
+def get_video_urls(self, sec_uid, type_flag=&apos;p&apos;):
+    &apos;&apos;&apos;
+    Get the video link of user
+    :param type_flag: the type of video
+    :return: nickname, video_list
+    &apos;&apos;&apos;
+    user_url_prefix = &apos;https://www.iesdouyin.com/web/api/v2/aweme/post&apos; if type_flag == &apos;p&apos; else &apos;https://www.iesdouyin.com/web/api/v2/aweme/like&apos;
+    print(&apos;---解析视频链接中...\r&apos;)
+
+    i = 0
+    result = []
+    while result == []:
+        i = i + 1
+        print(&apos;---正在第 {} 次尝试...\r&apos;.format(str(i)))
+        user_url = user_url_prefix + &apos;/?sec_uid=%s&amp;count=2000&apos; % (sec_uid)
+        response = self.get_request(user_url)
+        html = json.loads(response.content.decode())
+
+        if html[&apos;aweme_list&apos;] != []:
 
             result = html[&apos;aweme_list&apos;]
 
@@ -136,6 +237,14 @@ DouYin().hello().run()</code></pre><p>实现界面：<a href="https://blog.csdn.
 <hr>
 <p><strong>结：</strong><br>&emsp;&emsp;基本完成任务，不过由于时间学习不足，只搞懂了第一个爬虫原理和实现方法，第二个也只是浅显的理解小部分方法的实现，在本学期学了机器学习这门课加之此次爬虫经历，python这门语言确实方便和深厚，不枉有人来这么一句“python是世界上最好的语言”。下次更博不知道什么时候，不过估计更新的通过JavaScript实现最短路径导航，算法的期末作业。</p>
 ]]></content>
+      <categories>
+        <category>爬虫</category>
+      </categories>
+      <tags>
+        <tag>爬虫</tag>
+        <tag>python</tag>
+        <tag>自媒体</tag>
+      </tags>
   </entry>
   <entry>
     <title>第一篇博客</title>
