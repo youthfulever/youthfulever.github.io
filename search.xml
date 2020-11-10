@@ -13,4 +13,249 @@
         <tag>GitHub</tag>
       </tags>
   </entry>
+  <entry>
+    <title>blog2:批量下载无水印抖音和用户主页抖音</title>
+    <url>/2020/11/10/blog2-%E6%89%B9%E9%87%8F%E4%B8%8B%E8%BD%BD%E6%97%A0%E6%B0%B4%E5%8D%B0%E6%8A%96%E9%9F%B3%E5%92%8C%E7%94%A8%E6%88%B7%E4%B8%BB%E9%A1%B5%E6%8A%96%E9%9F%B3/</url>
+    <content><![CDATA[<p>&emsp;&emsp;前段时间进行自媒体视频搬运，需要下载无水印的抖音视频，于是在网上找资源，确实找到了一些网页或小程序，但几乎都存在一些问题，比如下载速度慢，只能单链接下载，下载次数有限制，于是花了一个星期开始了爬虫的学习，找到了与抖音视频下载有关的爬虫博客进行借鉴，弄清了实现原理，分别进行了修改。<br><strong>一：批量下载抖音视频</strong><br>&emsp;&emsp;修改第一个单链接下载抖音视频，使单链接下载变成了多链接下载，并且可以带有汉字，可以一次输入多个链接。<br>代码如下：</p>
+<pre><code>import requests
+from requests import get
+import re
+import datetime
+import os
+def download_video(shrot_video_url,count): 
+# 电脑UA访问短链接，通过302重定向时response.headers中的location标签获取视频id号
+headers = {&apos;user-agent&apos;: &apos;Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/63.0.3239.26 Safari/537.36 Core/1.63.5558.400 QQBrowser/10.1.1695.400&apos;, }
+response = requests.get(url=shrot_video_url, headers=headers, allow_redirects=False)
+items_ids = re.findall(r&apos;video/(.*?)/&apos;, response.headers[&apos;location&apos;])[0]
+# 电脑UA访问官方api视频分享接口，获取视频播放链接，通过替换 playwm 为 play 后，得到无水印的视频播放连接
+url = &apos;https://www.iesdouyin.com/web/api/v2/aweme/iteminfo/?item_ids={}&apos;.format(items_ids)
+headers = {&apos;user-agent&apos;: &apos;Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36&apos;, }
+response = requests.get(url=url, headers=headers)
+play_addr = response.json().get(&apos;item_list&apos;)[0][&apos;video&apos;][&apos;play_addr&apos;][&apos;url_list&apos;][0]
+play_addr_nowm = str(play_addr).replace(&apos;playwm&apos;, &apos;play&apos;)
+playname=response.json().get(&apos;item_list&apos;)[0][&apos;desc&apos;]
+
+# 手机UA访问无水印的视频播放链接，经过302重定向后，获取无水印视频播放真实链接 （注意：此处若使用电脑UA则获取不到任何数据）
+headers = {&apos;user-agent&apos;: &apos;Mozilla/5.0 (iPhone; CPU iPhone OS 13_2_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.3 Mobile/15E148 Safari/604.1&apos;, }
+response = requests.get(url=play_addr_nowm, headers=headers, allow_redirects=False)
+real_play_addr_nowm = response.headers[&apos;location&apos;]
+
+
+
+# 手机UA访问，下载视频 （注意：此处若使用电脑UA则获取不到任何数据）
+headers = {
+    &apos;user-agent&apos;: &apos;Mozilla/5.0 (iPhone; CPU iPhone OS 13_2_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.3 Mobile/15E148 Safari/604.1&apos;,
+    &apos;Connection&apos;: &apos;keep-alive&apos;,
+    &apos;Host&apos;: &apos;v5-dy-d.ixigua.com&apos;
+}
+r = requests.get(url=real_play_addr_nowm, headers=headers, stream=True)
+
+# 下载视频
+today=datetime.datetime.now().strftime(&apos;%Y-%m-%d&apos;)
+if not os.path.exists(&apos;./{}&apos;.format(today)):
+    os.mkdir(&apos;./{}&apos;.format(today))
+
+with open(&apos;./{}/{}.mp4&apos;.format(today, playname), &quot;wb&quot;) as mp4:
+    for chunk in r.iter_content(chunk_size=1024 * 1024):
+        if chunk:
+            mp4.write(chunk)
+
+print(&quot;第%d个下载成功&quot;%count)
+
+if __name__ == &apos;__main__&apos;:
+count=1
+# 单个视频分享页————下载无水印视频
+urls=input(&apos;请输入多个链接（可以带汉字）:&apos;)
+video_list = re.findall(r&apos;(http.*?) &apos;, urls)
+
+
+for j in video_list:
+    download_video(j,count)
+    count=count+1;</code></pre><p>实现界面：<a href="https://blog.csdn.net/Python_sn/article/details/109358372?ops_request_misc=%257B%2522request%255Fid%2522%253A%2522160497764019725266900315%2522%252C%2522scm%2522%253A%252220140713.130102334.pc%255Fblog.%2522%257D&request_id=160497764019725266900315&biz_id=0&utm_medium=distribute.pc_search_result.none-task-blog-2~blog~first_rank_v1~rank_blog_v1-6-109358372.pc_v1_rank_blog_v1&utm_term=%E6%8A%96%E9%9F%B3&spm=1018.2118.3001.4450" target="_blank" rel="noopener">参考博客1</a><br><img src="https://i.loli.net/2020/11/10/GrwdfqoxF56LmbW.jpg" alt="实现界面.jpg"><br><strong>二：下载用户主页全部视频</strong><br>修改第二个下载抖音用户全部视频，由原来用户输入sec_id变成了用户直接输入主页链接就可以了，原来输入sec_id情况，对于没有爬虫和网页基础的人很难找到sec_id。不过原博就存在一个问题，其实并不是下载全部视频，大约三十个左右。分析了一遍代码也没找到哪里的问题，估计是抖音用特殊方法处理了。<br>实现代码：</p>
+<pre><code>import os, sys, requests
+import json, re, time
+from retrying import retry
+from contextlib import closing
+class DouYin: 
+def __init__(self):
+    self.headers = {
+        &apos;accept&apos;: &apos;text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9&apos;,
+        &apos;accept-language&apos;: &apos;zh-CN,zh;q=0.9,en;q=0.8&apos;,
+        &apos;pragma&apos;: &apos;no-cache&apos;,
+        &apos;cache-control&apos;: &apos;no-cache&apos;,
+        &apos;upgrade-insecure-requests&apos;: &apos;1&apos;,
+        &apos;User-Agent&apos;: &apos;Mozilla/5.0 (iPhone; CPU iPhone OS 13_2_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.3 Mobile/15E148 Safari/604.1&apos;,
+    }
+
+def hello(self):
+    &apos;&apos;&apos;
+    This is welcome speech
+    :return: self
+    &apos;&apos;&apos;
+    print(&quot;*&quot; * 50)
+    print(&apos; &apos; * 15 + &apos;抖音下载小助手&apos;)
+    print(&apos; &apos; * 5 + &apos;作者: Felix  Date: 2020-05-20 13:14&apos;)
+    print(&apos; &apos; * 15 + &apos;无水印 | 有水印&apos;)
+    print(&apos; &apos; * 12 + &apos;输入用户主页链接即可&apos;)
+    print(&apos; &apos; * 2 + &apos;用浏览器打开用户分享链接，复制参数中sec_uid&apos;)
+    print(&quot;*&quot; * 50)
+    return self
+
+def get_video_urls(self, sec_uid, type_flag=&apos;p&apos;):
+    &apos;&apos;&apos;
+    Get the video link of user
+    :param type_flag: the type of video
+    :return: nickname, video_list
+    &apos;&apos;&apos;
+    user_url_prefix = &apos;https://www.iesdouyin.com/web/api/v2/aweme/post&apos; if type_flag == &apos;p&apos; else &apos;https://www.iesdouyin.com/web/api/v2/aweme/like&apos;
+    print(&apos;---解析视频链接中...\r&apos;)
+
+    i = 0
+    result = []
+    while result == []:
+        i = i + 1
+        print(&apos;---正在第 {} 次尝试...\r&apos;.format(str(i)))
+        user_url = user_url_prefix + &apos;/?sec_uid=%s&amp;count=2000&apos; % (sec_uid)
+        response = self.get_request(user_url)
+        html = json.loads(response.content.decode())
+
+        if html[&apos;aweme_list&apos;] != []:
+
+            result = html[&apos;aweme_list&apos;]
+
+    nickname = None
+    video_list = []
+    for item in result:
+        if nickname is None:
+            nickname = item[&apos;author&apos;][&apos;nickname&apos;] if re.sub(r&apos;[\/:*?&quot;&lt;&gt;|]&apos;, &apos;&apos;, item[&apos;author&apos;][&apos;nickname&apos;]) else None
+
+        video_list.append({
+            &apos;desc&apos;: re.sub(r&apos;[\/:*?&quot;&lt;&gt;|]&apos;, &apos;&apos;, item[&apos;desc&apos;]) if item[&apos;desc&apos;] else &apos;无标题&apos; + str(int(time.time())),
+            &apos;url&apos;: item[&apos;video&apos;][&apos;play_addr&apos;][&apos;url_list&apos;][0]
+        })
+    return nickname, video_list
+
+def get_download_url(self, video_url, watermark_flag):
+    &apos;&apos;&apos;
+    Whether to download watermarked videos
+    :param video_url: the url of video
+    :param watermark_flag: the type of video
+    :return: the url of o
+    &apos;&apos;&apos;
+    if watermark_flag == True:
+        download_url = video_url.replace(&apos;api.amemv.com&apos;, &apos;aweme.snssdk.com&apos;)
+    else:
+        download_url = video_url.replace(&apos;aweme.snssdk.com&apos;, &apos;api.amemv.com&apos;)
+
+    return download_url
+
+def video_downloader(self, video_url, video_name, watermark_flag=False):
+    &apos;&apos;&apos;
+    Download the video
+    :param video_url: the url of video
+    :param video_name: the name of video
+    :param watermark_flag: the flag of video
+    :return: None
+    &apos;&apos;&apos;
+    size = 0
+    video_url = self.get_download_url(video_url, watermark_flag=watermark_flag)
+    with closing(requests.get(video_url, headers=self.headers, stream=True)) as response:
+        chunk_size = 1024
+        content_size = int(response.headers[&apos;content-length&apos;])
+        if response.status_code == 200:
+            sys.stdout.write(&apos;----[文件大小]:%0.2f MB\n&apos; % (content_size / chunk_size / 1024))
+
+            with open(video_name + &apos;.mp4&apos;, &apos;wb&apos;) as file:
+                for data in response.iter_content(chunk_size=chunk_size):
+                    file.write(data)
+                    size += len(data)
+                    file.flush()
+
+                    sys.stdout.write(&apos;----[下载进度]:%.2f%%&apos; % float(size / content_size * 100) + &apos;\r&apos;)
+                    sys.stdout.flush()
+
+@retry(stop_max_attempt_number=3)
+def get_request(self, url, params=None):
+    &apos;&apos;&apos;
+    Send a get request
+    :param url: the url of request
+    :param params: the params of request
+    :return: the result of request
+    &apos;&apos;&apos;
+    if params is None:
+        params = {}
+    response = requests.get(url, params=params, headers=self.headers, timeout=10)
+    assert response.status_code == 200
+    return response
+
+@retry(stop_max_attempt_number=3)
+def post_request(self, url, data=None):
+    &apos;&apos;&apos;
+    Send a post request
+    :param url: the url of request
+    :param data: the params of request
+    :return: the result of request
+    &apos;&apos;&apos;
+    if data is None:
+        data = {}
+    response = requests.post(url, data=data, headers=self.headers, timeout=10)
+    assert response.status_code == 200
+    return response
+
+def run(self):
+    &apos;&apos;&apos;
+    Program entry
+    &apos;&apos;&apos;
+    urls=input(&apos;请输入用户主页链接（可以带汉字）:&apos;)
+    video_list = re.findall(r&apos;(https://v.douyin.com/.*?/)&apos;, urls)[0]
+    headers = {&apos;user-agent&apos;: &apos;Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/63.0.3239.26 Safari/537.36 Core/1.63.5558.400 QQBrowser/10.1.1695.400&apos;, }
+    response = requests.get(url=video_list, headers=headers, allow_redirects=False)
+    sec_uid = re.findall(r&apos;uid=(.*?)&amp;&apos;, response.headers[&apos;location&apos;])[0]
+    sec_uid = sec_uid if sec_uid else &apos;MS4wLjABAAAAle_oORaZCgYlB84cLTKSqRFvDgGmgrJsS6n3TfwxonM&apos;
+
+    watermark_flag = input(&apos;是否下载带水印的视频 (0-否(默认), 1-是):&apos;)
+    watermark_flag = bool(int(watermark_flag)) if watermark_flag else 0
+
+    type_flag = input(&apos;p-上传的(默认), l-收藏的:&apos;)
+    type_flag = type_flag if type_flag else &apos;p&apos;
+
+    save_dir = input(&apos;保存路径 (默认&quot;./Download/&quot;):&apos;)
+    save_dir = save_dir if save_dir else &quot;./Download/&quot;
+
+    nickname, video_list = self.get_video_urls(sec_uid, type_flag)
+    nickname_dir = os.path.join(save_dir, nickname)
+
+    if not os.path.exists(nickname_dir):
+        os.makedirs(nickname_dir)
+
+    if type_flag == &apos;f&apos;:
+        if &apos;favorite&apos; not in os.listdir(nickname_dir):
+            os.mkdir(os.path.join(nickname_dir, &apos;favorite&apos;))
+
+    print(&apos;---视频下载中: 共有%d个作品...\r&apos; % len(video_list))
+
+    for num in range(len(video_list)):
+        print(&apos;---正在解析第%d个视频链接 [%s] 中，请稍后...\n&apos; % (num + 1, video_list[num][&apos;desc&apos;]))
+
+        video_path = os.path.join(nickname_dir, video_list[num][&apos;desc&apos;]) if type_flag != &apos;f&apos; else os.path.join(nickname_dir, &apos;favorite&apos;, video_list[num][&apos;desc&apos;])
+        if os.path.isfile(video_path):
+            print(&apos;---视频已存在...\r&apos;)
+        else:
+            self.video_downloader(video_list[num][&apos;url&apos;], video_path, watermark_flag)
+        print(&apos;\n&apos;)
+    print(&apos;---下载完成...\r&apos;)
+
+if __name__ == &quot;__main__&quot;:
+DouYin().hello().run()</code></pre><p>实现界面：<a href="https://blog.csdn.net/Python_sn/article/details/108951267" target="_blank" rel="noopener">参考博客2</a><br><img src="https://i.loli.net/2020/11/10/KlSI1tmCvDN7w4s.jpg" alt="实现界面2.jpg"></p>
+<hr>
+<p><strong>结：</strong><br>&emsp;&emsp;基本完成任务，不过由于时间学习不足，只搞懂了第一个爬虫原理和实现方法，第二个也只是浅显的理解小部分方法的实现，在本学期学了机器学习这门课加之此次爬虫经历，python这门语言确实方便和深厚，不枉有人来这么一句“python是世界上最好的语言”。下次更博不知道什么时候，不过估计更新的通过JavaScript实现最短路径导航，算法的期末作业。</p>
+]]></content>
+      <categories>
+        <category>爬虫</category>
+      </categories>
+      <tags>
+        <tag>爬虫</tag>
+        <tag>python，自媒体</tag>
+      </tags>
+  </entry>
 </search>
