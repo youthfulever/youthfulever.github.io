@@ -6,7 +6,7 @@
   <link href="https://youthfuever.github.io/atom.xml" rel="self"/>
   
   <link href="https://youthfuever.github.io/"/>
-  <updated>2020-11-10T06:40:18.137Z</updated>
+  <updated>2020-11-10T06:44:23.986Z</updated>
   <id>https://youthfuever.github.io/</id>
   
   <author>
@@ -21,10 +21,10 @@
     <link href="https://youthfuever.github.io/2020/11/10/%E7%88%AC%E8%99%AB%E6%89%B9%E9%87%8F%E4%B8%8B%E8%BD%BD%E6%97%A0%E6%B0%B4%E5%8D%B0%E6%8A%96%E9%9F%B3%E8%A7%86%E9%A2%91%E5%92%8C%E7%94%A8%E6%88%B7%E4%B8%BB%E9%A1%B5%E5%85%A8%E9%83%A8%E8%A7%86%E9%A2%91/"/>
     <id>https://youthfuever.github.io/2020/11/10/%E7%88%AC%E8%99%AB%E6%89%B9%E9%87%8F%E4%B8%8B%E8%BD%BD%E6%97%A0%E6%B0%B4%E5%8D%B0%E6%8A%96%E9%9F%B3%E8%A7%86%E9%A2%91%E5%92%8C%E7%94%A8%E6%88%B7%E4%B8%BB%E9%A1%B5%E5%85%A8%E9%83%A8%E8%A7%86%E9%A2%91/</id>
     <published>2020-11-10T06:17:50.000Z</published>
-    <updated>2020-11-10T06:40:18.137Z</updated>
+    <updated>2020-11-10T06:44:23.986Z</updated>
     
     
-    <summary type="html">&lt;p&gt;&amp;emsp;&amp;emsp;前段时间进行自媒体视频搬运，需要下载无水印的抖音视频，于是在网上找资源，确实找到了一些网页或小程序，但几乎都存在一些问题，比如下载速度慢，只能单链接下载，下载次数有限制，于是花了一个星期开始了爬虫的学习，找到了与抖音视频下载有关的爬虫博客进行借鉴，弄清了实现原理，分别进行了修改。</summary>
+    <summary type="html">&lt;p&gt;&amp;emsp;&amp;emsp;前段时间进行自媒体视频搬运，需要下载无水印的抖音视频，于是在网上找资源，确实找到了一些网页或小程序，但几乎都存在一些问题，</summary>
     
     
     
@@ -44,16 +44,10 @@
     <link href="https://youthfuever.github.io/2020/10/26/%E7%AC%AC%E4%B8%80%E7%AF%87%E5%8D%9A%E5%AE%A2/"/>
     <id>https://youthfuever.github.io/2020/10/26/%E7%AC%AC%E4%B8%80%E7%AF%87%E5%8D%9A%E5%AE%A2/</id>
     <published>2020-10-26T09:59:02.000Z</published>
-    <updated>2020-10-26T14:36:55.000Z</updated>
+    <updated>2020-11-10T06:44:25.728Z</updated>
     
     
-      
-      
-        
-        
-    <summary type="html">&lt;p&gt;#　很早以前就搭建了本博客，当时仅采用hexo+github，然后博客加载速度很慢，就没再去管理，而后看到&lt;a href=&quot;https://www.baifan97.cn/&quot; target=&quot;_blank&quot;</summary>
-        
-      
+    <summary type="html">&lt;p&gt;#　很早以前就搭建了本博客，当时仅采用hexo+github，然后博客加载速度很慢，就没再去管理，而后看到</summary>
     
     
     
