@@ -13,7 +13,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
   <title>
-    friends |  晏然
+    算法：调用百度地图api使用Dijkstra确定最短路径（二） |  晏然
   </title>
   <meta name="generator" content="hexo-theme-ayer">
   
@@ -60,8 +60,8 @@
     <main class="content on">
       <section class="outer">
   <article
-  id="page-"
-  class="article article-type-page"
+  id="post-算法：调用百度地图api使用Dijkstra确定最短路径"
+  class="article article-type-post"
   itemscope
   itemprop="blogPost"
   data-scroll-reveal
@@ -71,18 +71,299 @@
     <header class="article-header">
        
 <h1 class="article-title sea-center" style="border-left:0" itemprop="name">
-  friends
+  算法：调用百度地图api使用Dijkstra确定最短路径（二）
 </h1>
  
 
     </header>
-       
+     
+    <div class="article-meta">
+      <a href="/2020/12/14/%E7%AE%97%E6%B3%95%EF%BC%9A%E8%B0%83%E7%94%A8%E7%99%BE%E5%BA%A6%E5%9C%B0%E5%9B%BEapi%E4%BD%BF%E7%94%A8Dijkstra%E7%A1%AE%E5%AE%9A%E6%9C%80%E7%9F%AD%E8%B7%AF%E5%BE%84/" class="article-date">
+  <time datetime="2020-12-14T15:15:32.000Z" itemprop="datePublished">2020-12-14</time>
+</a> 
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/%E7%AE%97%E6%B3%95/">算法</a>
+  </div>
+  
+<div class="word_count">
+    <span class="post-time">
+        <span class="post-meta-item-icon">
+            <i class="ri-quill-pen-line"></i>
+            <span class="post-meta-item-text"> 字数统计:</span>
+            <span class="post-count">2.2k</span>
+        </span>
+    </span>
+
+    <span class="post-time">
+        &nbsp; | &nbsp;
+        <span class="post-meta-item-icon">
+            <i class="ri-book-open-line"></i>
+            <span class="post-meta-item-text"> 阅读时长≈</span>
+            <span class="post-count">10 分钟</span>
+        </span>
+    </span>
+</div>
+ 
+    </div>
+      
+
+
+
+  
     <div class="article-entry" itemprop="articleBody">
        
-  <hr>
-<p>title: friends<br>type: friends<br>layout: “friends”</p>
-<hr>
- 
+  <p>算法设计与分析课程，调用百度地图api使用Dijkstra确定最短路径，由于前一个网页没使用到算法，毕竟是算法课程，所以又补了一个页面。<a id="more"></a><br>代码有时存在bug,主要是因为地点名字的选取不好弄，不行可以多刷新两次，代码复用的话修改地点name数组和点阵的二元数组。<br><img src="https://i.loli.net/2020/12/14/1KlrDmELgbQFq59.jpg" alt="功能界面.jpg"></p>
+<pre><code>&lt;html&gt;
+&lt;head&gt;
+&lt;meta http-equiv=&quot;Content-Type&quot; content=&quot;text/html; charset=utf-8&quot; /&gt;
+&lt;meta name=&quot;viewport&quot; content=&quot;initial-scale=1.0, user-scalable=no&quot; /&gt;
+&lt;style type=&quot;text/css&quot;&gt;
+    body, html {width: 100%;height: 100%;margin:0;font-family:&quot;微软雅黑&quot;;}
+    #allmap{width:100%;height:700px;}
+    p{margin-left:5px; font-size:14px;}
+&lt;/style&gt;
+ &lt;script type=&quot;text/javascript&quot; src=&quot;https://api.map.baidu.com/api?v=2.0&amp;ak=E4805d16520de693a3fe707cdc962045&quot;&gt;&lt;/script&gt;
+&lt;title&gt;搜索区域内关键词&lt;/title&gt;
+&lt;/head&gt;
+&lt;body onload=&quot;blur();searchByStationName()&quot;&gt;
+&lt;div id=&quot;allmap&quot;&gt;&lt;/div&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+&lt;script type=&quot;text/javascript&quot;&gt;
+// 百度地图API功能
+var map = new BMap.Map(&quot;allmap&quot;,{enableMapClick:false});            // 创建Map实例
+map.centerAndZoom(new BMap.Point(117.079771, 36.650838), 18);       // 使用经纬度（精度，维度）创建点坐标(117.079771, 36.650838)  18是缩放等级
+map.disableScrollWheelZoom(true);//禁用滚轮放大缩小
+var clicktime=1;  //标注点点击的监听事件，记录第一次点击还是第二次点击
+var startPointInNumber;   //起始点和终点和距离
+var endPointInNumber;
+var shortestDist;  //最短路径距离
+var shortestPath;  //最短的路径字符串
+var ceshi=0;
+//起始点和终点的折线
+var start;
+var end;
+//为了给每个point标注一下
+var mOption = {
+        poiRadius : 1000,           //定义每个点的扩展半径为r米
+        numPois : 1                 //最多只有12个 系统决定的
+    }
+var myGeo = new BMap.Geocoder();   //构建一个地址解析器,用于获取站点信息和周围的point
+//   变量按照课本命名
+var matrix=new Array();
+//初始化图中点的连接关系，初始化为互不相通
+for(i=0;i&lt;15;i++){
+    matrix[i]=new Array();
+    for(j=0;j&lt;15;j++){
+        if(i==j)
+            matrix[i][i]=0;
+        else
+            matrix[i][j]=1000;//不可达
+   }
+}
+var pointarr=new Array();   //用鼠标点击得到的位置点数组,里面记录了经纬度
+var disarr=new Array();
+var namearr=[&apos;山东财经大学燕山校区西门&apos;,&apos;山东财经大学二号教学楼&apos;,&apos;山东财经大学燕山校区艺术学院&apos;,&apos;山东财经大学燕山校区三号教学楼&apos;,&apos;山东财经大学宿舍&apos;,&apos;山东财经大学老年体育协会&apos;,&apos;山东财经大学西区教工宿舍3号楼&apos;,&apos;西苑小厨&apos;,&apos;外国专家楼&apos;,&apos;山东财经大学燕山校区校医院&apos;,&apos;山东财经大学燕山校区-体育场&apos;,&apos;山东财经大学逸夫楼&apos;,&apos;山东财经大学燕山校区南门&apos;,&apos;山东财经大学东苑餐厅&apos;,&apos;学景大酒店&apos;];
+//连接可通的两个point
+var line=[
+    [0,1,1,0,0,1,0,0,0,0,0,0,0,0,0],
+    [1,0,0,1,0,0,0,0,0,0,0,0,0,0,0],
+    [1,0,0,1,0,0,0,0,0,0,0,0,0,0,0],
+    [0,1,1,0,0,0,0,1,0,1,0,0,0,0,0],
+    [0,0,0,0,0,1,1,0,0,0,0,0,0,0,0],
+    [1,0,0,0,1,0,0,0,1,1,0,0,0,0,0],
+    [0,0,0,0,1,0,0,0,1,0,0,0,0,0,0],
+    [0,0,0,1,0,0,0,0,0,1,0,1,0,0,0],
+    [0,0,0,0,0,1,1,0,0,0,1,0,0,0,0],
+    [0,0,0,1,0,1,0,1,0,0,1,0,0,0,0],
+    [0,0,0,0,0,0,0,0,1,1,0,1,0,1,0],
+    [0,0,0,0,0,0,0,1,0,0,1,0,1,0,0],
+    [0,0,0,0,0,0,0,0,0,0,0,1,0,1,1],
+    [0,0,0,0,0,0,0,0,0,0,1,0,1,0,1],
+    [0,0,0,0,0,0,0,0,0,0,0,0,1,1,0],];
+//Dijkstra最短路径算法 类似贪心算法 参考https://www.cnblogs.com/biyeymyhjob/archive/2012/07/31/2615833.html
+function Dijk(v0,v1){
+var dist=new Array();//源点到顶点i的最短距离
+var prev=new Array();//记录最短路的路径
+var isFind=new Array();  //是否被检索
+for(var i=0;i&lt;15;i++){//distance是两点间距离
+    dist[i]=matrix[v0][i];
+    isFind[i]=false;
+    if(dist[i]=1000)
+        prev[i]=-1;
+    else
+        prev[i]=v0;
+}
+    dist[v0]=0;
+    isFind[v0]=true;
+for(var i=1;i&lt;15;i++){
+    var minDist=1000;
+    var u=v0;
+    for(var j=0;j&lt;15;++j){
+        if((!isFind[j])&amp;&amp;dist[j]&lt;minDist){  //如果j没有发现，并且从v0到j比现在的最短距离还要小
+            u=j;
+            minDist=dist[j];
+        }
+    }
+    isFind[u]=true;
+    for(j=0;j&lt;15;j++){
+        if((!isFind[j])&amp;&amp;matrix[u][j]&lt;1000)
+            if(dist[u]+matrix[u][j]&lt;dist[j]){    //在通过新加入的u点路径找到离v0点更短的路径
+               　　dist[j] = dist[u]+matrix[u][j];    //更新dist
+               　　prev[j] = u;                    //记录前驱顶
+            }
+    }
+}
+console.log((v0+1)+&quot;到&quot;+(v1+1)+&quot;的最短距离为&quot;+dist[v1]);
+shortestDist=dist[v1]
+showPath(v0,v1,prev);//显示路径
+}
+function showPath(v0,v1,prev){//显示路径
+var pathInNum=&quot;&quot;;
+var pathString=&quot;&quot;;
+var des;   //目的地
+des=v1;
+console.log(des);
+for(i=0; i&lt;15; i++){
+    if(prev[des]!=-1){
+        if(pathString!=&quot;&quot;)
+            pathString=namearr[des]+&quot;——&gt;&quot;+pathString;
+        else
+            pathString=namearr[des]+pathString;
+        if(pathInNum!=&quot;&quot;)
+            pathInNum=(des+1)+&quot;——&gt;&quot;+pathInNum;
+        else
+            pathInNum=(des+1)+pathInNum;
+        des=prev[des];
+    }
+}
+pathInNum=&quot;路径为:&quot;+(v0+1)+&quot;——&gt;&quot;+pathInNum;
+pathString=&quot;\n&quot;+namearr[v0]+&quot;——&gt;&quot;+pathString;
+shortestPath=pathString;
+console.log(pathInNum);
+console.log(pathString);
+}
+var localSearch = new BMap.LocalSearch(map);    //本地搜索，提供某一特定地区的位置搜索服务，比如在北京市搜索“公园”。
+function searchByStationName() {   //根据地址名查询经纬度
+for(var i=0;i&lt;namearr.length;i++){
+    localSearch.setSearchCompleteCallback(function (searchResult) {
+        var poi = searchResult.getPoi(0);
+        myGeo.getLocation(poi.point,function mCallback(rs){
+            var marker = new BMap.Marker(poi.point);  // 创建标注对应到要查询的地址上，用要查询的地方对应的经纬度表示
+            map.addOverlay(marker);   //添加红色标注点
+            marker.addEventListener(&quot;click&quot;, function(e){   //添加点击事件，点击后创建一个标注点
+                if(clicktime==1){               //当点击次数为1，代表此次点击为起点
+                    for(var z=0;z&lt;15;z++){
+                        if(poi.point.lat==pointarr[z].lat){
+                            map.removeOverlay(start);
+                            map.removeOverlay(end);
+                            //点击完把起始点设置为黑色滤镜
+                            ///////
+                            start=null;
+                            start = new BMap.Circle(poi.point, 8, {
+                                strokeColor: &apos;black&apos;,
+                                strokeWeight: 16,
+                                strokeOpacity: 0
+                            });
+                            map.addOverlay(start);
+                            ///////
+                            alert(&quot;该点为起始点-----&quot;+namearr[z]+(z+1));
+                            startPointInNumber=z;
+                            clicktime=2;
+                        }
+                    }
+                }
+                else if(clicktime=2){
+                    for(z=0;z&lt;15;z++){
+                        if(poi.point.lat==pointarr[z].lat){     //百度一次性利用多线程技术将所有的15个点全部检索出来
+                                                                //只好把它细化到经纬度上面，如果
+                            //点击完把结束点设置为黑色滤镜
+                            ///////
+                            end=null;
+                            end = new BMap.Circle(poi.point, 8, {
+                                strokeColor: &apos;black&apos;,
+                                strokeWeight: 16,
+                                strokeOpacity: 0
+                            });
+                            map.addOverlay(end);
+                            ///////
+                            endPointInNumber=z;
+                            Dijk(startPointInNumber,endPointInNumber);
+                            alert(namearr[startPointInNumber]+(startPointInNumber+1)+&quot;------&quot;+namearr[z]+(z+1)+&quot;\n的最短距离为&quot;+parseInt(shortestDist)+&quot;米\n&quot;+shortestPath);
+                            clicktime=1;   //变成1退出当前循环，但是又会被卷入另一场循环
+                        }
+                    }
+                }
+            });
+            //当前还在最外层for循环内
+            pointarr.push(poi.point);
+            if(pointarr.length==15){
+                  arrBubble(pointarr);    //检索某一个地点会检索出来很多位置，排序后选择第一个最近的位置
+                  connection(pointarr);
+              }
+            },mOption);
+    });
+    localSearch.search(namearr[i]);     //搜索本地“山东财经大学”，只会匹配到燕山校区
+}
+}
+//排序
+function arrBubble(arr){
+    for(var i=0;i&lt;arr.length;i++){
+        for(var j=0;j&lt;arr.length-1;j++){
+            if(arr[j+1].lng&lt;arr[j].lng){
+                var temp=arr[j];
+                arr[j]=arr[j+1];
+                arr[j+1]=temp;
+            }
+        }
+    }
+    return arr;
+}
+function connection(arr){       //绘制折线polyline
+for(i=0;i&lt;arr.length;i++){
+    for(j=0;j&lt;i;j++){
+        if(line[i][j]==1){
+            var polyline = new BMap.Polyline([arr[i],arr[j]],{strokeColor:&quot;blue&quot;, strokeWeight:6, strokeOpacity:0.5} );
+            map.addOverlay(polyline);
+            /////
+            matrix[i][j]=matrix[j][i]=getDis(pointarr[i],pointarr[j]);      //计算两点之间的距离，并写入到原来的matrix中，现在表示权重
+            console.log((i+1)+&quot;到&quot;+(j+1)+&quot;的距离&quot;+matrix[i][j]);
+        }
+    }
+}
+}
+function getDis(pointa,pointb) {    //使用经纬度计算两点之间的距离
+// 纬度
+var lat1 = (Math.PI / 180) * pointa.lat;
+var lat2 = (Math.PI / 180) * pointb.lat;
+// 经度
+var lon1 = (Math.PI / 180) * pointa.lng;
+var lon2 = (Math.PI / 180) * pointb.lng;
+// 地球半径
+var R = 6371;
+// 两点间距离 km，如果想要米的话，结果*1000就可以了
+var d = Math.acos(Math.sin(lat1) * Math.sin(lat2) + Math.cos(lat1) * Math.cos(lat2) * Math.cos(lon2 - lon1)) * R;
+return d*1000;
+}
+//搜索功能无法实现，就当为了展示半透明矩形吧
+function blur(){
+var local = new BMap.LocalSearch(map, {
+    renderOptions:{map: map}
+});
+var pStart = new BMap.Point(117.075771,36.653078);
+var pEnd = new BMap.Point(117.084173,36.64883);
+var bs = new BMap.Bounds(pStart,pEnd);   //自己规定范围,这里是
+local.searchInBounds(&quot;食堂&quot;, bs);
+var polygon = new BMap.Polygon(
+    [
+        new BMap.Point(pStart.lng,pStart.lat),
+        new BMap.Point(pEnd.lng,pStart.lat),
+        new BMap.Point(pEnd.lng,pEnd.lat),
+        new BMap.Point(pStart.lng,pEnd.lat)
+    ], {strokeColor:&quot;blue&quot;, strokeWeight:6, strokeOpacity:0.5});
+map.addOverlay(polygon);
+}    
+&lt;/script&gt;</code></pre> 
       <!-- reward -->
       
       <div id="reword-out">
@@ -152,15 +433,36 @@
     <a class="modal-close" href="javascript:;"><i class="ri-close-circle-line"></i></a>
     <p>扫一扫，分享到微信</p>
     <div class="wx-qrcode">
-      <img src="//api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://youthfuever.github.io/friends/" alt="微信分享二维码">
+      <img src="//api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://youthfuever.github.io/2020/12/14/%E7%AE%97%E6%B3%95%EF%BC%9A%E8%B0%83%E7%94%A8%E7%99%BE%E5%BA%A6%E5%9C%B0%E5%9B%BEapi%E4%BD%BF%E7%94%A8Dijkstra%E7%A1%AE%E5%AE%9A%E6%9C%80%E7%9F%AD%E8%B7%AF%E5%BE%84/" alt="微信分享二维码">
     </div>
 </div>
 
 <div id="share-mask"></div>  
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E5%89%8D%E7%AB%AF/" rel="tag">前端</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E7%99%BE%E5%BA%A6%E5%9C%B0%E5%9B%BEapi/" rel="tag">百度地图api</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E7%AE%97%E6%B3%95/" rel="tag">算法</a></li></ul>
+
     </footer>
   </div>
 
    
+  <nav class="article-nav">
+    
+      <a href="/2020/12/14/%E8%AE%B0%E5%BD%95%E7%AC%AC%E4%B8%80%E6%AC%A1%E7%9A%84%E5%8D%9A%E5%AE%A2%E7%9A%84%E5%85%B3%E4%BA%8E%E6%88%91%E6%A8%A1%E5%9D%97/" class="article-nav-link">
+        <strong class="article-nav-caption">上一篇</strong>
+        <div class="article-nav-title">
+          
+            记录第一次的博客的关于我模块
+          
+        </div>
+      </a>
+    
+    
+      <a href="/2020/12/14/%E5%89%8D%E7%AB%AF%EF%BC%9A%E4%BD%BF%E7%94%A8%E7%99%BE%E5%BA%A6%E5%9C%B0%E5%9B%BEapi-%E5%AE%9E%E7%8E%B0%E4%B8%80%E4%BA%9B%E5%8A%9F%E8%83%BD%EF%BC%8C%E7%AE%80%E5%8D%95%E8%B0%83%E7%94%A8/" class="article-nav-link">
+        <strong class="article-nav-caption">下一篇</strong>
+        <div class="article-nav-title">前端：使用百度地图api,实现一些功能，简单调用（一）</div>
+      </a>
+    
+  </nav>
+
    
 <!-- valine评论 -->
 <div id="vcomments-box">
@@ -210,7 +512,7 @@
 </style>
 
  
-   
+     
 </article>
 
 </section>
@@ -366,6 +668,23 @@
 <script src="/js/lazyload.min.js"></script>
 
 <!-- Tocbot -->
+
+
+<script src="/js/tocbot.min.js"></script>
+
+<script>
+  tocbot.init({
+    tocSelector: '.tocbot',
+    contentSelector: '.article-entry',
+    headingSelector: 'h1, h2, h3, h4, h5, h6',
+    hasInnerContainers: true,
+    scrollSmooth: true,
+    scrollContainer: 'main',
+    positionFixedSelector: '.tocbot',
+    positionFixedClass: 'is-position-fixed',
+    fixedSidebarOffset: 'auto'
+  });
+</script>
 
 <script src="https://cdn.jsdelivr.net/npm/jquery-modal@0.9.2/jquery.modal.min.js"></script>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jquery-modal@0.9.2/jquery.modal.min.css">

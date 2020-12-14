@@ -3,7 +3,7 @@
   <entry>
     <title>第一篇博客</title>
     <url>/2020/10/26/%E7%AC%AC%E4%B8%80%E7%AF%87%E5%8D%9A%E5%AE%A2/</url>
-    <content><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="\assets\css\APlayer.min.css"><script src="\assets\js\APlayer.min.js" class="aplayer-secondary-script-marker"></script><p>#　很早以前就搭建了本博客，当时仅采用hexo+github，然后博客加载速度很慢，就没再去管理，而后看到<a id="more"></a><a href="https://www.baifan97.cn/" target="_blank" rel="noopener">https://www.baifan97.cn/</a> ，于是又开始有了优化博客的想法，查到在国内使用coding代码托管访问速度会快一些，便把网站变成了hexo+github+coding双托管模式，然后加载速度还是没有变快，于是我尝试了更换博客主题，由开始的TLK主题变为了现在的ayer主题，加载速度确实变快了很多，主要是博客首页大图的加载方式改变了，加载原理有待去深入研究，肉眼可见的区别是部分加载和颜色逐渐加载。然后开始使用本域名youth7.xyz 。</p>
+    <content><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="\assets\css\APlayer.min.css"><script src="\assets\js\APlayer.min.js" class="aplayer-secondary-script-marker"></script><p>很早以前就搭建了本博客，当时仅采用hexo+github，然后博客加载速度很慢，就没再去管理，而后看到<a id="more"></a><a href="https://www.baifan97.cn/" target="_blank" rel="noopener">https://www.baifan97.cn/</a> ，于是又开始有了优化博客的想法，查到在国内使用coding代码托管访问速度会快一些，便把网站变成了hexo+github+coding双托管模式，然后加载速度还是没有变快，于是我尝试了更换博客主题，由开始的TLK主题变为了现在的ayer主题，加载速度确实变快了很多，主要是博客首页大图的加载方式改变了，加载原理有待去深入研究，肉眼可见的区别是部分加载和颜色逐渐加载。然后开始使用本域名youth7.xyz 。</p>
 ]]></content>
       <categories>
         <category>博客</category>
@@ -257,6 +257,683 @@ DouYin().hello().run()</code></pre><p>实现界面：<a href="https://blog.csdn.
         <tag>爬虫</tag>
         <tag>python</tag>
         <tag>自媒体</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>前端：使用百度地图api,实现一些功能，简单调用（一）</title>
+    <url>/2020/12/14/%E5%89%8D%E7%AB%AF%EF%BC%9A%E4%BD%BF%E7%94%A8%E7%99%BE%E5%BA%A6%E5%9C%B0%E5%9B%BEapi-%E5%AE%9E%E7%8E%B0%E4%B8%80%E4%BA%9B%E5%8A%9F%E8%83%BD%EF%BC%8C%E7%AE%80%E5%8D%95%E8%B0%83%E7%94%A8/</url>
+    <content><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="\assets\css\APlayer.min.css"><script src="\assets\js\APlayer.min.js" class="aplayer-secondary-script-marker"></script><p>算法设计与分析课程，实现如下大部分功能，基本都实现了，有需要的可以自己试验一下，不过未使用算法，编写算法确定最短路径看下一篇文章<a id="more"></a><br>1.获取数据，地图定位、放大缩小、 平移和显示<br>2.路径规划 ：(工具)驾车 步行  公交     室内/室外    校园/商城/城市<br>3.路径查询 ：（评价）路程  时间  经济（起终经点选择  历史和新增）<br>4.动态路径规划、实时显示   着色  选择   比较    避开拥堵  高速优先<br>5.路径实时导航（根据动态交通信息，如交通阻塞、机车故障等实时语音提示  偏离报警与处理）<br>6.查找搜索附近美食 停车场 医院等。<br>7.车辆监管、即将到站车辆发出的位置和速度信息，显示车辆运行情况，并预测到站时间。<br><img src="https://i.loli.net/2020/12/14/m841LGRJCFi2Xo9.jpg" alt="功能界面.jpg"><br>具体代码如下：</p>
+<pre><code>&lt;!DOCTYPE html&gt;  
+&lt;html&gt;
+&lt;head&gt;  
+&lt;meta name=&quot;viewport&quot; content=&quot;initial-scale=1.0, user-scalable=no&quot; /&gt;  
+&lt;meta http-equiv=&quot;Content-Type&quot; content=&quot;text/html; charset=utf-8&quot; /&gt;  
+&lt;title&gt;Hello, World&lt;/title&gt;  
+&lt;style type=&quot;text/css&quot;&gt;  
+html{height:100%}  
+body{height:100%;margin:0px;padding:0px}  
+#container{height:80%;width: 80%}  
+&lt;/style&gt;    
+&lt;script type=&quot;text/javascript&quot; src=&quot;https://api.map.baidu.com/api?v=2.0&amp;ak=E4805d16520de693a3fe707cdc962045&quot;&gt;&lt;/script&gt;
+&lt;script type=&quot;text/javascript&quot; src=&quot;https://api.map.baidu.com/library/SearchInfoWindow/1.5/src/SearchInfoWindow_min.js&quot;&gt;&lt;/script&gt;
+&lt;link rel=&quot;stylesheet&quot; href=&quot;https://api.map.baidu.com/library/SearchInfoWindow/1.5/src/SearchInfoWindow_min.css&quot; /&gt;
+&lt;link href=&quot;https://api.map.baidu.com/library/TrafficControl/1.4/src/TrafficControl_min.css&quot; rel=&quot;stylesheet&quot; type=&quot;text/css&quot; /&gt;
+&lt;script type=&quot;text/javascript&quot; src=&quot;https://api.map.baidu.com/library/TrafficControl/1.4/src/TrafficControl_min.js&quot;&gt;&lt;/script&gt;
+&lt;script crossorigin=&quot;anonymous&quot; integrity=&quot;sha384-AQhQSZGQWTMJhb/TdS7NWpCmOM/8lIEsaevSU5oZtt8pQKoa+uJL4A2WnQ0O5Zj2&quot; src=&quot;https://lib.baomitu.com/jquery/3.5.0/jquery.js&quot;&gt;&lt;/script&gt;
+&lt;/head&gt;  
+&lt;body&gt;  
+&lt;div id=&quot;container&quot;&gt;&lt;/div&gt; 
+&lt;button onclick=&quot;button1()&quot;&gt;开启/关闭标注点&lt;/button&gt;
+&lt;button onclick=&quot;button2()&quot;&gt;清除标注点&lt;/button&gt;
+&lt;input id=&quot;keyword&quot; type=&quot;text&quot;/&gt;
+&lt;input type=&quot;button&quot; value=&quot;搜索&quot; onclick=&quot;searchByStationName();&quot;/&gt;
+&lt;br/&gt;
+起始点&lt;input id=&quot;start1&quot; type=&quot;text&quot;/&gt;
+终点&lt;input id=&quot;end1&quot; type=&quot;text&quot;/&gt;
+&lt;br/&gt;
+&lt;div id=&quot;driving_way&quot; style=&quot;display: inline-block;&quot;&gt;
+    &lt;select&gt;
+        &lt;option value=&quot;0&quot;&gt;最少时间&lt;/option&gt;
+        &lt;option value=&quot;1&quot;&gt;最短距离&lt;/option&gt;
+        &lt;option value=&quot;2&quot;&gt;避开高速&lt;/option&gt;
+    &lt;/select&gt;
+    &lt;input type=&quot;button&quot; id=&quot;result&quot; value=&quot;驾车&quot;/&gt;
+    &lt;/div&gt;
+    &lt;br/&gt;
+    &amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&lt;input type=&quot;button&quot; id=&quot;walk&quot; value=&quot;步行&quot;/&gt;
+    &lt;br/&gt;
+    &lt;div id=&quot;driving_way1&quot;&gt;
+    &lt;select&gt;
+        &lt;option value=&quot;0&quot;&gt;最少时间&lt;/option&gt;
+        &lt;option value=&quot;1&quot;&gt;最少换乘&lt;/option&gt;
+        &lt;option value=&quot;2&quot;&gt;最少步行&lt;/option&gt;
+        &lt;option value=&quot;3&quot;&gt;不乘地铁&lt;/option&gt;
+    &lt;/select&gt;
+    &lt;input type=&quot;button&quot; id=&quot;bus&quot; value=&quot;公交&quot;/&gt;
+&lt;/div&gt;    
+&lt;script type=&quot;text/javascript&quot;&gt; 
+var map = new BMap.Map(&quot;container&quot;,{enableMapClick:false});// 创建地图实例  
+var point = new BMap.Point(116.404, 39.915);// 创建点坐标  
+map.centerAndZoom(point, 16);// 初始化地图，设置中心点坐标和地图级别 
+map.enableScrollWheelZoom(); 
+map.addControl(new BMap.NavigationControl({
+// 靠左上角位置
+anchor: BMAP_ANCHOR_TOP_LEFT,
+// LARGE类型
+type: BMAP_NAVIGATION_CONTROL_LARGE,
+// 启用显示定位
+enableGeolocation: true // 会多出一个点
+  }));  //左上角平移缩放控件
+map.addControl(new BMap.ScaleControl());        //比例尺控件
+map.addControl(new BMap.OverviewMapControl());    //右下角的缩小地图
+//-------------------------定位
+ var geolocationControl = new BMap.GeolocationControl();
+geolocationControl.addEventListener(&quot;locationSuccess&quot;, function(e){
+// 定位成功事件
+var marker = new BMap.Marker(e.point);  // 创建标注，为要查询的地方对应的经纬度
+map.addOverlay(marker);
+marker.setAnimation(BMAP_ANIMATION_BOUNCE); //跳动的动画
+var address1 = &apos;&apos;;
+address1 += e.addressComponent.province;
+address1 += e.addressComponent.city;
+address1 += e.addressComponent.district;
+address1 += e.addressComponent.street;
+address1 += e.addressComponent.streetNumber;
+alert(&quot;当前定位地址为：&quot; + address1);
+myGeo.getLocation(e.point,function mCallback(rs){
+        var marker = new BMap.Marker(e.point);  // 创建标注，为要查询的地方对应的经纬度
+        map.addOverlay(marker);
+        marker.setAnimation(BMAP_ANIMATION_BOUNCE); //跳动的动画
+        marker.addEventListener(&quot;click&quot;, function(e){
+            searchInfoWindow.open(marker);
+        });
+        //创建检索信息窗口对象
+        var searchInfoWindow = null;
+        searchInfoWindow = new BMapLib.SearchInfoWindow(map, &apos;&lt;div style=&quot;margin:0;line-height:20px;padding:2px;&quot;&gt;&apos;+rs.address+&apos;&lt;/div&gt;&apos; , {
+                title  : &quot;当前定位位置&quot;,      //标题
+                width  : 290,             //宽度
+                height : 105,              //高度
+                panel  : &quot;panel&quot;,         //检索结果面板
+                enableAutoPan : true,     //自动平移
+                searchTypes   :[
+                    BMAPLIB_TAB_SEARCH,   //周边检索
+                    BMAPLIB_TAB_TO_HERE,  //到这里去
+                    BMAPLIB_TAB_FROM_HERE //从这里出发
+                ]
+            });
+        searchInfoWindow.open(marker);//自动展示搜索结果
+         },mOption); 
+});
+geolocationControl.addEventListener(&quot;locationError&quot;,function(e){
+// 定位失败事件
+alert(e.message);
+});
+map.addControl(geolocationControl);
+///后方用到的变量----------------------------
+var myGeo = new BMap.Geocoder();   //构建一个地址解析器,用于获取站点信息和周围的poi,用于22
+//1111111111111111开启关闭标注点函数
+var pointarr=new Array();
+var pointcount=0;
+var marknarr=new Array();
+var contentarr=new Array();
+var mOption = {
+    poiRadius : 100,           //半径为r米内的POI,
+    numPois : 1             //最多只有12个 系统决定的
+}
+function showmark(){
+for(i=0;i&lt;pointcount;i++)
+{
+    map.addOverlay(marknarr[i]);
+}
+}
+function makerlisten(e){    //地图标注点监听事件
+    pointarr[pointcount]=e.point;
+    myGeo.getLocation(e.point,function mCallback(rs){
+    marknarr[pointcount]=new BMap.Marker(pointarr[pointcount]); 
+    marknarr[pointcount].addEventListener(&quot;click&quot;, function(e){
+    var searchInfoWindow = null;
+    searchInfoWindow = new BMapLib.SearchInfoWindow(map, &apos;&lt;div style=&quot;margin:0;line-height:20px;padding:2px;&quot;&gt;&apos;+rs.address+&apos;&lt;/div&gt;&apos;, {
+        title  : &quot;地址&quot;,      //标题
+        width  : 290,             //宽度
+        height : 60,              //高度
+        panel  : &quot;panel&quot;,         //检索结果面板
+        enableAutoPan : true,     //自动平移
+        searchTypes   :[
+            BMAPLIB_TAB_SEARCH,   //周边检索
+            BMAPLIB_TAB_TO_HERE,  //到这里去
+            BMAPLIB_TAB_FROM_HERE //从这里出发
+        ]
+    });
+    searchInfoWindow.open(e.point);
+});
+    pointcount++;
+    showmark();
+    },mOption);     
+}
+var buttonbol=1;
+function button1(){
+if(buttonbol==1){
+    map.addEventListener(&quot;click&quot;,makerlisten);
+    buttonbol=0;
+}
+    else{
+        map.removeEventListener(&quot;click&quot;,makerlisten);
+        buttonbol=1;
+    }
+}
+function button2(){
+map.clearOverlays();
+pointcount=0;
+}
+//-----------------------3
+var localSearch = new BMap.LocalSearch(map);
+localSearch.enableAutoViewport(); //根据搜索结果自动调节窗体大小   
+function searchByStationName() {
+    map.clearOverlays();//清空原来的标注
+    var keyword = document.getElementById(&quot;keyword&quot;).value;
+     localSearch.setSearchCompleteCallback(function (searchResult) {
+        var poi = searchResult.getPoi(0);
+        console.log(poi.point);
+        //document.getElementById(&quot;jingweidu&quot;).value = poi.point.lng + &quot;,&quot; + poi.point.lat;
+        map.centerAndZoom(poi.point, 13);
+        map.enableScrollWheelZoom();
+        myGeo.getLocation(poi.point,function mCallback(rs){
+        var marker = new BMap.Marker(new BMap.Point(poi.point.lng, poi.point.lat));  // 创建标注，为要查询的地方对应的经纬度
+        map.addOverlay(marker);
+        marker.setAnimation(BMAP_ANIMATION_BOUNCE); //跳动的动画
+        marker.addEventListener(&quot;click&quot;, function(e){
+            searchInfoWindow.open(marker);
+        });
+        //创建检索信息窗口对象
+        var searchInfoWindow = null;
+        searchInfoWindow = new BMapLib.SearchInfoWindow(map, &apos;&lt;div style=&quot;margin:0;line-height:20px;padding:2px;&quot;&gt;&apos;+rs.address+&apos;&lt;/div&gt;&apos; , {
+                title  : keyword,      //标题
+                width  : 290,             //宽度
+                height : 105,              //高度
+                panel  : &quot;panel&quot;,         //检索结果面板
+                enableAutoPan : true,     //自动平移
+                searchTypes   :[
+                    BMAPLIB_TAB_SEARCH,   //周边检索
+                    BMAPLIB_TAB_TO_HERE,  //到这里去
+                    BMAPLIB_TAB_FROM_HERE //从这里出发
+                ]
+            });
+        searchInfoWindow.open(marker);//自动展示搜索结果
+         },mOption); 
+    });
+    localSearch.search(keyword);
+
+}
+//显示流量
+ var ctrl = new BMapLib.TrafficControl({
+    showPanel: false //是否显示路况提示面板
+});      
+map.addControl(ctrl);
+ctrl.setAnchor(BMAP_ANCHOR_BOTTOM_RIGHT); 
+//------起始点和终点路径
+//三种驾车策略：最少时间，最短距离，避开高速
+var routePolicy = [BMAP_DRIVING_POLICY_LEAST_TIME,BMAP_DRIVING_POLICY_LEAST_DISTANCE,BMAP_DRIVING_POLICY_AVOID_HIGHWAYS];
+$(&quot;#result&quot;).click(function(){
+    var start = document.getElementById(&quot;start1&quot;).value;
+    var end = document.getElementById(&quot;end1&quot;).value;
+    map.clearOverlays(); 
+    var i=$(&quot;#driving_way select&quot;).val();
+    search(start,end,routePolicy[i]); 
+    function search(start,end,route){ 
+        var driving = new BMap.DrivingRoute(map, {renderOptions:{map: map, autoViewport: true},policy: route});
+        driving.search(start,end);
+    }
+    //
+    var output = start+&quot;到&quot;+end+&quot;驾车需要&quot;;
+    var searchComplete = function (results){
+        if (transit.getStatus() != BMAP_STATUS_SUCCESS){
+            return ;
+        }
+        var plan = results.getPlan(0);
+        output += plan.getDuration(true) + &quot;\n&quot;;                //获取时间
+        output += &quot;总路程为：&quot; ;
+        output += plan.getDistance(true) + &quot;\n&quot;;             //获取距离
+    }
+    var transit = new BMap.DrivingRoute(map, {renderOptions: {map: map},
+        onSearchComplete: searchComplete,
+        onPolylinesSet: function(){        
+            setTimeout(function(){alert(output)},&quot;1000&quot;);
+    }});
+    transit.search(start, end);
+    //
+});
+///----------------步行和公交
+$(&quot;#walk&quot;).click(function(){
+    map.clearOverlays();
+    var start = document.getElementById(&quot;start1&quot;).value;
+    var end = document.getElementById(&quot;end1&quot;).value;
+    var walking = new BMap.WalkingRoute(map, {renderOptions:{map: map, autoViewport: true}});
+    walking.search(start, end);
+});
+$(&quot;#bus&quot;).click(function(){
+var routePolicy = [BMAP_TRANSIT_POLICY_LEAST_TIME,BMAP_TRANSIT_POLICY_LEAST_TRANSFER,BMAP_TRANSIT_POLICY_LEAST_WALKING,BMAP_TRANSIT_POLICY_AVOID_SUBWAYS];
+var transit = new BMap.TransitRoute(map, {
+        renderOptions: {map: map},
+        policy: 0
+    });
+map.clearOverlays();
+    var start = document.getElementById(&quot;start1&quot;).value;
+    var end = document.getElementById(&quot;end1&quot;).value;
+    var walking = new BMap.WalkingRoute(map, {renderOptions:{map: map, autoViewport: true}});
+    walking.search(start, end);
+    var i=$(&quot;#driving_way1 select&quot;).val();
+    search(start,end,routePolicy[i]); 
+    function search(start,end,route){ 
+        transit.setPolicy(route);
+        transit.search(start,end);
+    }
+    //时间和路程
+    var output = start+&quot;到&quot;+end+&quot;驾车需要&quot;;;
+    var transit = new BMap.TransitRoute(map,{
+        renderOptions: {map: map},
+        onSearchComplete: function(results){
+            if (transit.getStatus() != BMAP_STATUS_SUCCESS){
+                return ;
+            }
+            var plan = results.getPlan(0);
+            output += &apos;总时长：&apos; + plan.getDuration(true);  //获取时间
+            output += &apos;总路程：&apos; + plan.getDistance(true);  //获取距离
+            alert(output);
+        },
+    });
+    transit.search(start, end);
+});
+&lt;/script&gt;  
+&lt;/body&gt;  
+&lt;/html&gt;</code></pre>]]></content>
+      <categories>
+        <category>前端</category>
+      </categories>
+      <tags>
+        <tag>前端</tag>
+        <tag>JavaScript</tag>
+        <tag>百度地图api</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>汇编语言：循环程序设计</title>
+    <url>/2020/12/14/%E6%B1%87%E7%BC%96%E8%AF%AD%E8%A8%80%EF%BC%9A%E5%BE%AA%E7%8E%AF%E7%A8%8B%E5%BA%8F%E8%AE%BE%E8%AE%A1/</url>
+    <content><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="\assets\css\APlayer.min.css"><script src="\assets\js\APlayer.min.js" class="aplayer-secondary-script-marker"></script><p>&emsp;&emsp;编写一个汇编语言循环程序时遇到问题，最后还是在老师帮助下解决，在网上查这个题也查不到，那我就发一下吧，万一有人看呢。<a id="more"></a><br>&emsp;&emsp;编程分类统计字符个数，要求：程序接受用户键入的一行字符(该字符串用回车符结束)，并按字母、数字及其他字符分类计数，然后将结果存入以letter、digit和other为名的存储单元中，并显示（设各类字符的个数不超过9个），显示格式如下：<br>letter_counter:  x<br>digit_counter:  x<br>other_counter:  x<br><img src="https://i.loli.net/2020/12/14/MWU2wsYPm7va3QT.jpg" alt="功能界面.jpg"><br>汇编代码如下：</p>
+<pre><code>DATAS  SEGMENT
+    lstr db  &apos;letter_counter: &apos;,&apos;$&apos;
+    dstr db  &apos;digit_counter:&apos;,&apos;$&apos;
+    ostr db  &apos;other_counter:&apos;,&apos;$&apos;
+    letter db 0
+    digit  db 0
+    other  db 0
+    input  db 10,?,10 dup(?)
+DATAS  ENDS
+CODES  SEGMENT
+     ASSUME    CS:CODES,DS:DATAS
+START:
+    mov  ax,datas
+    mov  ds,ax
+    lea  dx,input;输入
+    mov  ah,0ah
+    int  21h    
+    mov  bl,input+1;输入个数  此三行必须
+    sub  bh,bh
+    mov  byte ptr [bx+input+2],&apos;$&apos;
+    lea  dx,input+2;显示输入的字符串
+    mov  ah,09h
+    int  21h
+    mov  cl,input+1;输入个数为循环次数
+    sub  ch,ch
+    jcxz done
+again:
+    mov  bx,cx
+    mov  al,byte ptr[bx+input+1];取最后一个字符
+    cmp  al,30h
+    js   o_inc    ;小于0,其他
+    cmp  al,3ah
+    js   d_inc  ;数字0-9
+    cmp  al,41h
+    js   o_inc  ;9-A的其他
+    cmp  al,5bh
+    js   l_inc  ;A-Z
+    cmp  al,61h
+    js   o_inc  ;Z-a的其他
+    cmp  al,7bh
+    js   l_inc  ;a-z
+    jmp     o_inc  ;大于z的其他    
+    ;显示一个字符用于测试mov  ah,2mov  dl,alint  21h
+
+l_inc:
+    inc  letter
+    loop again
+    jmp  done
+d_inc:
+    inc  digit
+    loop again
+    jmp  done
+o_inc:
+    inc  other
+    loop again
+done:
+    mov  ah,2
+    mov  dl,0ah
+    int  21h
+    lea  dx,lstr
+    mov  ah,9
+    int  21h
+    mov  ah,2
+    mov  dl,letter
+    add  dl,30h
+    int  21h
+    mov  ah,2
+    mov  dl,0ah
+    int  21h;显示字母个数并换行    
+    lea  dx,dstr
+    mov  ah,9
+    int  21h
+    mov  ah,2
+    mov  dl,digit
+    add  dl,30h
+    int  21h
+    mov  ah,2
+    mov  dl,0ah
+    int  21h;显示数字个数
+    lea  dx,ostr
+    mov  ah,9
+    int  21h
+    mov  ah,2
+    mov  dl,other
+    add  dl,30h
+    int  21h
+    mov  ah,2
+    mov  dl,0ah
+    int  21h;显示字母个数
+
+    MOV  AH,4CH
+     INT  21H
+
+CODES  ENDS
+    END   START</code></pre>]]></content>
+      <categories>
+        <category>汇编语言</category>
+      </categories>
+      <tags>
+        <tag>汇编语言</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>记录第一次的博客的关于我模块</title>
+    <url>/2020/12/14/%E8%AE%B0%E5%BD%95%E7%AC%AC%E4%B8%80%E6%AC%A1%E7%9A%84%E5%8D%9A%E5%AE%A2%E7%9A%84%E5%85%B3%E4%BA%8E%E6%88%91%E6%A8%A1%E5%9D%97/</url>
+    <content><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="\assets\css\APlayer.min.css"><script src="\assets\js\APlayer.min.js" class="aplayer-secondary-script-marker"></script><pre><code>虽然搭建本博客也有一段时间，但ABOUT模块一直是空的，今天有空顺便也完善一下。计算机专业在读学生&lt;!--more--&gt;，就读于山东某大学，一次偶然机会开创本博客，单纯用于记录编程学习过程，爱好自媒体，一个朴实无华的搬运工，QQ看点创作者(搬运)，先阶段主要是进行初级爬虫学习，下一目标进行学习剪辑，进行原创。遇到有意义的问题或者项目记录一下，不定期更新，现计划考研，可能更新频率会少一点。学习交流的话,可以QQ763584254。</code></pre>]]></content>
+      <categories>
+        <category>博客</category>
+      </categories>
+      <tags>
+        <tag>博客</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>算法：调用百度地图api使用Dijkstra确定最短路径（二）</title>
+    <url>/2020/12/14/%E7%AE%97%E6%B3%95%EF%BC%9A%E8%B0%83%E7%94%A8%E7%99%BE%E5%BA%A6%E5%9C%B0%E5%9B%BEapi%E4%BD%BF%E7%94%A8Dijkstra%E7%A1%AE%E5%AE%9A%E6%9C%80%E7%9F%AD%E8%B7%AF%E5%BE%84/</url>
+    <content><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="\assets\css\APlayer.min.css"><script src="\assets\js\APlayer.min.js" class="aplayer-secondary-script-marker"></script><p>算法设计与分析课程，调用百度地图api使用Dijkstra确定最短路径，由于前一个网页没使用到算法，毕竟是算法课程，所以又补了一个页面。<a id="more"></a><br>代码有时存在bug,主要是因为地点名字的选取不好弄，不行可以多刷新两次，代码复用的话修改地点name数组和点阵的二元数组。<br><img src="https://i.loli.net/2020/12/14/1KlrDmELgbQFq59.jpg" alt="功能界面.jpg"></p>
+<pre><code>&lt;html&gt;
+&lt;head&gt;
+&lt;meta http-equiv=&quot;Content-Type&quot; content=&quot;text/html; charset=utf-8&quot; /&gt;
+&lt;meta name=&quot;viewport&quot; content=&quot;initial-scale=1.0, user-scalable=no&quot; /&gt;
+&lt;style type=&quot;text/css&quot;&gt;
+    body, html {width: 100%;height: 100%;margin:0;font-family:&quot;微软雅黑&quot;;}
+    #allmap{width:100%;height:700px;}
+    p{margin-left:5px; font-size:14px;}
+&lt;/style&gt;
+ &lt;script type=&quot;text/javascript&quot; src=&quot;https://api.map.baidu.com/api?v=2.0&amp;ak=E4805d16520de693a3fe707cdc962045&quot;&gt;&lt;/script&gt;
+&lt;title&gt;搜索区域内关键词&lt;/title&gt;
+&lt;/head&gt;
+&lt;body onload=&quot;blur();searchByStationName()&quot;&gt;
+&lt;div id=&quot;allmap&quot;&gt;&lt;/div&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+&lt;script type=&quot;text/javascript&quot;&gt;
+// 百度地图API功能
+var map = new BMap.Map(&quot;allmap&quot;,{enableMapClick:false});            // 创建Map实例
+map.centerAndZoom(new BMap.Point(117.079771, 36.650838), 18);       // 使用经纬度（精度，维度）创建点坐标(117.079771, 36.650838)  18是缩放等级
+map.disableScrollWheelZoom(true);//禁用滚轮放大缩小
+var clicktime=1;  //标注点点击的监听事件，记录第一次点击还是第二次点击
+var startPointInNumber;   //起始点和终点和距离
+var endPointInNumber;
+var shortestDist;  //最短路径距离
+var shortestPath;  //最短的路径字符串
+var ceshi=0;
+//起始点和终点的折线
+var start;
+var end;
+//为了给每个point标注一下
+var mOption = {
+        poiRadius : 1000,           //定义每个点的扩展半径为r米
+        numPois : 1                 //最多只有12个 系统决定的
+    }
+var myGeo = new BMap.Geocoder();   //构建一个地址解析器,用于获取站点信息和周围的point
+//   变量按照课本命名
+var matrix=new Array();
+//初始化图中点的连接关系，初始化为互不相通
+for(i=0;i&lt;15;i++){
+    matrix[i]=new Array();
+    for(j=0;j&lt;15;j++){
+        if(i==j)
+            matrix[i][i]=0;
+        else
+            matrix[i][j]=1000;//不可达
+   }
+}
+var pointarr=new Array();   //用鼠标点击得到的位置点数组,里面记录了经纬度
+var disarr=new Array();
+var namearr=[&apos;山东财经大学燕山校区西门&apos;,&apos;山东财经大学二号教学楼&apos;,&apos;山东财经大学燕山校区艺术学院&apos;,&apos;山东财经大学燕山校区三号教学楼&apos;,&apos;山东财经大学宿舍&apos;,&apos;山东财经大学老年体育协会&apos;,&apos;山东财经大学西区教工宿舍3号楼&apos;,&apos;西苑小厨&apos;,&apos;外国专家楼&apos;,&apos;山东财经大学燕山校区校医院&apos;,&apos;山东财经大学燕山校区-体育场&apos;,&apos;山东财经大学逸夫楼&apos;,&apos;山东财经大学燕山校区南门&apos;,&apos;山东财经大学东苑餐厅&apos;,&apos;学景大酒店&apos;];
+//连接可通的两个point
+var line=[
+    [0,1,1,0,0,1,0,0,0,0,0,0,0,0,0],
+    [1,0,0,1,0,0,0,0,0,0,0,0,0,0,0],
+    [1,0,0,1,0,0,0,0,0,0,0,0,0,0,0],
+    [0,1,1,0,0,0,0,1,0,1,0,0,0,0,0],
+    [0,0,0,0,0,1,1,0,0,0,0,0,0,0,0],
+    [1,0,0,0,1,0,0,0,1,1,0,0,0,0,0],
+    [0,0,0,0,1,0,0,0,1,0,0,0,0,0,0],
+    [0,0,0,1,0,0,0,0,0,1,0,1,0,0,0],
+    [0,0,0,0,0,1,1,0,0,0,1,0,0,0,0],
+    [0,0,0,1,0,1,0,1,0,0,1,0,0,0,0],
+    [0,0,0,0,0,0,0,0,1,1,0,1,0,1,0],
+    [0,0,0,0,0,0,0,1,0,0,1,0,1,0,0],
+    [0,0,0,0,0,0,0,0,0,0,0,1,0,1,1],
+    [0,0,0,0,0,0,0,0,0,0,1,0,1,0,1],
+    [0,0,0,0,0,0,0,0,0,0,0,0,1,1,0],];
+//Dijkstra最短路径算法 类似贪心算法 参考https://www.cnblogs.com/biyeymyhjob/archive/2012/07/31/2615833.html
+function Dijk(v0,v1){
+var dist=new Array();//源点到顶点i的最短距离
+var prev=new Array();//记录最短路的路径
+var isFind=new Array();  //是否被检索
+for(var i=0;i&lt;15;i++){//distance是两点间距离
+    dist[i]=matrix[v0][i];
+    isFind[i]=false;
+    if(dist[i]=1000)
+        prev[i]=-1;
+    else
+        prev[i]=v0;
+}
+    dist[v0]=0;
+    isFind[v0]=true;
+for(var i=1;i&lt;15;i++){
+    var minDist=1000;
+    var u=v0;
+    for(var j=0;j&lt;15;++j){
+        if((!isFind[j])&amp;&amp;dist[j]&lt;minDist){  //如果j没有发现，并且从v0到j比现在的最短距离还要小
+            u=j;
+            minDist=dist[j];
+        }
+    }
+    isFind[u]=true;
+    for(j=0;j&lt;15;j++){
+        if((!isFind[j])&amp;&amp;matrix[u][j]&lt;1000)
+            if(dist[u]+matrix[u][j]&lt;dist[j]){    //在通过新加入的u点路径找到离v0点更短的路径
+               　　dist[j] = dist[u]+matrix[u][j];    //更新dist
+               　　prev[j] = u;                    //记录前驱顶
+            }
+    }
+}
+console.log((v0+1)+&quot;到&quot;+(v1+1)+&quot;的最短距离为&quot;+dist[v1]);
+shortestDist=dist[v1]
+showPath(v0,v1,prev);//显示路径
+}
+function showPath(v0,v1,prev){//显示路径
+var pathInNum=&quot;&quot;;
+var pathString=&quot;&quot;;
+var des;   //目的地
+des=v1;
+console.log(des);
+for(i=0; i&lt;15; i++){
+    if(prev[des]!=-1){
+        if(pathString!=&quot;&quot;)
+            pathString=namearr[des]+&quot;——&gt;&quot;+pathString;
+        else
+            pathString=namearr[des]+pathString;
+        if(pathInNum!=&quot;&quot;)
+            pathInNum=(des+1)+&quot;——&gt;&quot;+pathInNum;
+        else
+            pathInNum=(des+1)+pathInNum;
+        des=prev[des];
+    }
+}
+pathInNum=&quot;路径为:&quot;+(v0+1)+&quot;——&gt;&quot;+pathInNum;
+pathString=&quot;\n&quot;+namearr[v0]+&quot;——&gt;&quot;+pathString;
+shortestPath=pathString;
+console.log(pathInNum);
+console.log(pathString);
+}
+var localSearch = new BMap.LocalSearch(map);    //本地搜索，提供某一特定地区的位置搜索服务，比如在北京市搜索“公园”。
+function searchByStationName() {   //根据地址名查询经纬度
+for(var i=0;i&lt;namearr.length;i++){
+    localSearch.setSearchCompleteCallback(function (searchResult) {
+        var poi = searchResult.getPoi(0);
+        myGeo.getLocation(poi.point,function mCallback(rs){
+            var marker = new BMap.Marker(poi.point);  // 创建标注对应到要查询的地址上，用要查询的地方对应的经纬度表示
+            map.addOverlay(marker);   //添加红色标注点
+            marker.addEventListener(&quot;click&quot;, function(e){   //添加点击事件，点击后创建一个标注点
+                if(clicktime==1){               //当点击次数为1，代表此次点击为起点
+                    for(var z=0;z&lt;15;z++){
+                        if(poi.point.lat==pointarr[z].lat){
+                            map.removeOverlay(start);
+                            map.removeOverlay(end);
+                            //点击完把起始点设置为黑色滤镜
+                            ///////
+                            start=null;
+                            start = new BMap.Circle(poi.point, 8, {
+                                strokeColor: &apos;black&apos;,
+                                strokeWeight: 16,
+                                strokeOpacity: 0
+                            });
+                            map.addOverlay(start);
+                            ///////
+                            alert(&quot;该点为起始点-----&quot;+namearr[z]+(z+1));
+                            startPointInNumber=z;
+                            clicktime=2;
+                        }
+                    }
+                }
+                else if(clicktime=2){
+                    for(z=0;z&lt;15;z++){
+                        if(poi.point.lat==pointarr[z].lat){     //百度一次性利用多线程技术将所有的15个点全部检索出来
+                                                                //只好把它细化到经纬度上面，如果
+                            //点击完把结束点设置为黑色滤镜
+                            ///////
+                            end=null;
+                            end = new BMap.Circle(poi.point, 8, {
+                                strokeColor: &apos;black&apos;,
+                                strokeWeight: 16,
+                                strokeOpacity: 0
+                            });
+                            map.addOverlay(end);
+                            ///////
+                            endPointInNumber=z;
+                            Dijk(startPointInNumber,endPointInNumber);
+                            alert(namearr[startPointInNumber]+(startPointInNumber+1)+&quot;------&quot;+namearr[z]+(z+1)+&quot;\n的最短距离为&quot;+parseInt(shortestDist)+&quot;米\n&quot;+shortestPath);
+                            clicktime=1;   //变成1退出当前循环，但是又会被卷入另一场循环
+                        }
+                    }
+                }
+            });
+            //当前还在最外层for循环内
+            pointarr.push(poi.point);
+            if(pointarr.length==15){
+                  arrBubble(pointarr);    //检索某一个地点会检索出来很多位置，排序后选择第一个最近的位置
+                  connection(pointarr);
+              }
+            },mOption);
+    });
+    localSearch.search(namearr[i]);     //搜索本地“山东财经大学”，只会匹配到燕山校区
+}
+}
+//排序
+function arrBubble(arr){
+    for(var i=0;i&lt;arr.length;i++){
+        for(var j=0;j&lt;arr.length-1;j++){
+            if(arr[j+1].lng&lt;arr[j].lng){
+                var temp=arr[j];
+                arr[j]=arr[j+1];
+                arr[j+1]=temp;
+            }
+        }
+    }
+    return arr;
+}
+function connection(arr){       //绘制折线polyline
+for(i=0;i&lt;arr.length;i++){
+    for(j=0;j&lt;i;j++){
+        if(line[i][j]==1){
+            var polyline = new BMap.Polyline([arr[i],arr[j]],{strokeColor:&quot;blue&quot;, strokeWeight:6, strokeOpacity:0.5} );
+            map.addOverlay(polyline);
+            /////
+            matrix[i][j]=matrix[j][i]=getDis(pointarr[i],pointarr[j]);      //计算两点之间的距离，并写入到原来的matrix中，现在表示权重
+            console.log((i+1)+&quot;到&quot;+(j+1)+&quot;的距离&quot;+matrix[i][j]);
+        }
+    }
+}
+}
+function getDis(pointa,pointb) {    //使用经纬度计算两点之间的距离
+// 纬度
+var lat1 = (Math.PI / 180) * pointa.lat;
+var lat2 = (Math.PI / 180) * pointb.lat;
+// 经度
+var lon1 = (Math.PI / 180) * pointa.lng;
+var lon2 = (Math.PI / 180) * pointb.lng;
+// 地球半径
+var R = 6371;
+// 两点间距离 km，如果想要米的话，结果*1000就可以了
+var d = Math.acos(Math.sin(lat1) * Math.sin(lat2) + Math.cos(lat1) * Math.cos(lat2) * Math.cos(lon2 - lon1)) * R;
+return d*1000;
+}
+//搜索功能无法实现，就当为了展示半透明矩形吧
+function blur(){
+var local = new BMap.LocalSearch(map, {
+    renderOptions:{map: map}
+});
+var pStart = new BMap.Point(117.075771,36.653078);
+var pEnd = new BMap.Point(117.084173,36.64883);
+var bs = new BMap.Bounds(pStart,pEnd);   //自己规定范围,这里是
+local.searchInBounds(&quot;食堂&quot;, bs);
+var polygon = new BMap.Polygon(
+    [
+        new BMap.Point(pStart.lng,pStart.lat),
+        new BMap.Point(pEnd.lng,pStart.lat),
+        new BMap.Point(pEnd.lng,pEnd.lat),
+        new BMap.Point(pStart.lng,pEnd.lat)
+    ], {strokeColor:&quot;blue&quot;, strokeWeight:6, strokeOpacity:0.5});
+map.addOverlay(polygon);
+}    
+&lt;/script&gt;</code></pre>]]></content>
+      <categories>
+        <category>算法</category>
+      </categories>
+      <tags>
+        <tag>前端</tag>
+        <tag>百度地图api</tag>
+        <tag>算法</tag>
       </tags>
   </entry>
 </search>

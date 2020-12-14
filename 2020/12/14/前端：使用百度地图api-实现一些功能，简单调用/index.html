@@ -13,7 +13,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
   <title>
-    爬虫批量下载无水印抖音视频和用户主页全部视频 |  晏然
+    前端：使用百度地图api,实现一些功能，简单调用（一） |  晏然
   </title>
   <meta name="generator" content="hexo-theme-ayer">
   
@@ -60,7 +60,7 @@
     <main class="content on">
       <section class="outer">
   <article
-  id="post-爬虫批量下载无水印抖音视频和用户主页全部视频"
+  id="post-前端：使用百度地图api-实现一些功能，简单调用"
   class="article article-type-post"
   itemscope
   itemprop="blogPost"
@@ -71,18 +71,18 @@
     <header class="article-header">
        
 <h1 class="article-title sea-center" style="border-left:0" itemprop="name">
-  爬虫批量下载无水印抖音视频和用户主页全部视频
+  前端：使用百度地图api,实现一些功能，简单调用（一）
 </h1>
  
 
     </header>
      
     <div class="article-meta">
-      <a href="/2020/11/10/%E7%88%AC%E8%99%AB%E6%89%B9%E9%87%8F%E4%B8%8B%E8%BD%BD%E6%97%A0%E6%B0%B4%E5%8D%B0%E6%8A%96%E9%9F%B3%E8%A7%86%E9%A2%91%E5%92%8C%E7%94%A8%E6%88%B7%E4%B8%BB%E9%A1%B5%E5%85%A8%E9%83%A8%E8%A7%86%E9%A2%91/" class="article-date">
-  <time datetime="2020-11-10T06:17:50.000Z" itemprop="datePublished">2020-11-10</time>
+      <a href="/2020/12/14/%E5%89%8D%E7%AB%AF%EF%BC%9A%E4%BD%BF%E7%94%A8%E7%99%BE%E5%BA%A6%E5%9C%B0%E5%9B%BEapi-%E5%AE%9E%E7%8E%B0%E4%B8%80%E4%BA%9B%E5%8A%9F%E8%83%BD%EF%BC%8C%E7%AE%80%E5%8D%95%E8%B0%83%E7%94%A8/" class="article-date">
+  <time datetime="2020-12-14T15:02:49.000Z" itemprop="datePublished">2020-12-14</time>
 </a> 
   <div class="article-category">
-    <a class="article-category-link" href="/categories/%E7%88%AC%E8%99%AB/">爬虫</a>
+    <a class="article-category-link" href="/categories/%E5%89%8D%E7%AB%AF/">前端</a>
   </div>
   
 <div class="word_count">
@@ -99,7 +99,7 @@
         <span class="post-meta-item-icon">
             <i class="ri-book-open-line"></i>
             <span class="post-meta-item-text"> 阅读时长≈</span>
-            <span class="post-count">11 分钟</span>
+            <span class="post-count">10 分钟</span>
         </span>
     </span>
 </div>
@@ -112,240 +112,290 @@
   
     <div class="article-entry" itemprop="articleBody">
        
-  <p>&emsp;&emsp;前段时间进行自媒体视频搬运，需要下载无水印的抖音视频，于是在网上找资源，确实找到了一些网页或小程序，但几乎都存在一些问题，<a id="more"></a>比如下载速度慢，只能单链接下载，下载次数有限制，于是花了一个星期开始了爬虫的学习，找到了与抖音视频下载有关的爬虫博客进行借鉴，弄清了实现原理，分别进行了修改。<br><strong>一：批量下载抖音视频</strong><br>&emsp;&emsp;修改第一个单链接下载抖音视频，使单链接下载变成了多链接下载，并且可以带有汉字，可以一次输入多个链接。<br>代码如下：</p>
-<pre><code>import requests
-from requests import get
-import re
-import datetime
-import os
-def download_video(shrot_video_url,count): 
-# 电脑UA访问短链接，通过302重定向时response.headers中的location标签获取视频id号
-headers = {&apos;user-agent&apos;: &apos;Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/63.0.3239.26 Safari/537.36 Core/1.63.5558.400 QQBrowser/10.1.1695.400&apos;, }
-response = requests.get(url=shrot_video_url, headers=headers, allow_redirects=False)
-items_ids = re.findall(r&apos;video/(.*?)/&apos;, response.headers[&apos;location&apos;])[0]
-# 电脑UA访问官方api视频分享接口，获取视频播放链接，通过替换 playwm 为 play 后，得到无水印的视频播放连接
-url = &apos;https://www.iesdouyin.com/web/api/v2/aweme/iteminfo/?item_ids={}&apos;.format(items_ids)
-headers = {&apos;user-agent&apos;: &apos;Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36&apos;, }
-response = requests.get(url=url, headers=headers)
-play_addr = response.json().get(&apos;item_list&apos;)[0][&apos;video&apos;][&apos;play_addr&apos;][&apos;url_list&apos;][0]
-play_addr_nowm = str(play_addr).replace(&apos;playwm&apos;, &apos;play&apos;)
-playname=response.json().get(&apos;item_list&apos;)[0][&apos;desc&apos;]
-
-# 手机UA访问无水印的视频播放链接，经过302重定向后，获取无水印视频播放真实链接 （注意：此处若使用电脑UA则获取不到任何数据）
-headers = {&apos;user-agent&apos;: &apos;Mozilla/5.0 (iPhone; CPU iPhone OS 13_2_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.3 Mobile/15E148 Safari/604.1&apos;, }
-response = requests.get(url=play_addr_nowm, headers=headers, allow_redirects=False)
-real_play_addr_nowm = response.headers[&apos;location&apos;]
-
-
-
-# 手机UA访问，下载视频 （注意：此处若使用电脑UA则获取不到任何数据）
-headers = {
-    &apos;user-agent&apos;: &apos;Mozilla/5.0 (iPhone; CPU iPhone OS 13_2_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.3 Mobile/15E148 Safari/604.1&apos;,
-    &apos;Connection&apos;: &apos;keep-alive&apos;,
-    &apos;Host&apos;: &apos;v5-dy-d.ixigua.com&apos;
+  <p>算法设计与分析课程，实现如下大部分功能，基本都实现了，有需要的可以自己试验一下，不过未使用算法，编写算法确定最短路径看下一篇文章<a id="more"></a><br>1.获取数据，地图定位、放大缩小、 平移和显示<br>2.路径规划 ：(工具)驾车 步行  公交     室内/室外    校园/商城/城市<br>3.路径查询 ：（评价）路程  时间  经济（起终经点选择  历史和新增）<br>4.动态路径规划、实时显示   着色  选择   比较    避开拥堵  高速优先<br>5.路径实时导航（根据动态交通信息，如交通阻塞、机车故障等实时语音提示  偏离报警与处理）<br>6.查找搜索附近美食 停车场 医院等。<br>7.车辆监管、即将到站车辆发出的位置和速度信息，显示车辆运行情况，并预测到站时间。<br><img src="https://i.loli.net/2020/12/14/m841LGRJCFi2Xo9.jpg" alt="功能界面.jpg"><br>具体代码如下：</p>
+<pre><code>&lt;!DOCTYPE html&gt;  
+&lt;html&gt;
+&lt;head&gt;  
+&lt;meta name=&quot;viewport&quot; content=&quot;initial-scale=1.0, user-scalable=no&quot; /&gt;  
+&lt;meta http-equiv=&quot;Content-Type&quot; content=&quot;text/html; charset=utf-8&quot; /&gt;  
+&lt;title&gt;Hello, World&lt;/title&gt;  
+&lt;style type=&quot;text/css&quot;&gt;  
+html{height:100%}  
+body{height:100%;margin:0px;padding:0px}  
+#container{height:80%;width: 80%}  
+&lt;/style&gt;    
+&lt;script type=&quot;text/javascript&quot; src=&quot;https://api.map.baidu.com/api?v=2.0&amp;ak=E4805d16520de693a3fe707cdc962045&quot;&gt;&lt;/script&gt;
+&lt;script type=&quot;text/javascript&quot; src=&quot;https://api.map.baidu.com/library/SearchInfoWindow/1.5/src/SearchInfoWindow_min.js&quot;&gt;&lt;/script&gt;
+&lt;link rel=&quot;stylesheet&quot; href=&quot;https://api.map.baidu.com/library/SearchInfoWindow/1.5/src/SearchInfoWindow_min.css&quot; /&gt;
+&lt;link href=&quot;https://api.map.baidu.com/library/TrafficControl/1.4/src/TrafficControl_min.css&quot; rel=&quot;stylesheet&quot; type=&quot;text/css&quot; /&gt;
+&lt;script type=&quot;text/javascript&quot; src=&quot;https://api.map.baidu.com/library/TrafficControl/1.4/src/TrafficControl_min.js&quot;&gt;&lt;/script&gt;
+&lt;script crossorigin=&quot;anonymous&quot; integrity=&quot;sha384-AQhQSZGQWTMJhb/TdS7NWpCmOM/8lIEsaevSU5oZtt8pQKoa+uJL4A2WnQ0O5Zj2&quot; src=&quot;https://lib.baomitu.com/jquery/3.5.0/jquery.js&quot;&gt;&lt;/script&gt;
+&lt;/head&gt;  
+&lt;body&gt;  
+&lt;div id=&quot;container&quot;&gt;&lt;/div&gt; 
+&lt;button onclick=&quot;button1()&quot;&gt;开启/关闭标注点&lt;/button&gt;
+&lt;button onclick=&quot;button2()&quot;&gt;清除标注点&lt;/button&gt;
+&lt;input id=&quot;keyword&quot; type=&quot;text&quot;/&gt;
+&lt;input type=&quot;button&quot; value=&quot;搜索&quot; onclick=&quot;searchByStationName();&quot;/&gt;
+&lt;br/&gt;
+起始点&lt;input id=&quot;start1&quot; type=&quot;text&quot;/&gt;
+终点&lt;input id=&quot;end1&quot; type=&quot;text&quot;/&gt;
+&lt;br/&gt;
+&lt;div id=&quot;driving_way&quot; style=&quot;display: inline-block;&quot;&gt;
+    &lt;select&gt;
+        &lt;option value=&quot;0&quot;&gt;最少时间&lt;/option&gt;
+        &lt;option value=&quot;1&quot;&gt;最短距离&lt;/option&gt;
+        &lt;option value=&quot;2&quot;&gt;避开高速&lt;/option&gt;
+    &lt;/select&gt;
+    &lt;input type=&quot;button&quot; id=&quot;result&quot; value=&quot;驾车&quot;/&gt;
+    &lt;/div&gt;
+    &lt;br/&gt;
+    &amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&lt;input type=&quot;button&quot; id=&quot;walk&quot; value=&quot;步行&quot;/&gt;
+    &lt;br/&gt;
+    &lt;div id=&quot;driving_way1&quot;&gt;
+    &lt;select&gt;
+        &lt;option value=&quot;0&quot;&gt;最少时间&lt;/option&gt;
+        &lt;option value=&quot;1&quot;&gt;最少换乘&lt;/option&gt;
+        &lt;option value=&quot;2&quot;&gt;最少步行&lt;/option&gt;
+        &lt;option value=&quot;3&quot;&gt;不乘地铁&lt;/option&gt;
+    &lt;/select&gt;
+    &lt;input type=&quot;button&quot; id=&quot;bus&quot; value=&quot;公交&quot;/&gt;
+&lt;/div&gt;    
+&lt;script type=&quot;text/javascript&quot;&gt; 
+var map = new BMap.Map(&quot;container&quot;,{enableMapClick:false});// 创建地图实例  
+var point = new BMap.Point(116.404, 39.915);// 创建点坐标  
+map.centerAndZoom(point, 16);// 初始化地图，设置中心点坐标和地图级别 
+map.enableScrollWheelZoom(); 
+map.addControl(new BMap.NavigationControl({
+// 靠左上角位置
+anchor: BMAP_ANCHOR_TOP_LEFT,
+// LARGE类型
+type: BMAP_NAVIGATION_CONTROL_LARGE,
+// 启用显示定位
+enableGeolocation: true // 会多出一个点
+  }));  //左上角平移缩放控件
+map.addControl(new BMap.ScaleControl());        //比例尺控件
+map.addControl(new BMap.OverviewMapControl());    //右下角的缩小地图
+//-------------------------定位
+ var geolocationControl = new BMap.GeolocationControl();
+geolocationControl.addEventListener(&quot;locationSuccess&quot;, function(e){
+// 定位成功事件
+var marker = new BMap.Marker(e.point);  // 创建标注，为要查询的地方对应的经纬度
+map.addOverlay(marker);
+marker.setAnimation(BMAP_ANIMATION_BOUNCE); //跳动的动画
+var address1 = &apos;&apos;;
+address1 += e.addressComponent.province;
+address1 += e.addressComponent.city;
+address1 += e.addressComponent.district;
+address1 += e.addressComponent.street;
+address1 += e.addressComponent.streetNumber;
+alert(&quot;当前定位地址为：&quot; + address1);
+myGeo.getLocation(e.point,function mCallback(rs){
+        var marker = new BMap.Marker(e.point);  // 创建标注，为要查询的地方对应的经纬度
+        map.addOverlay(marker);
+        marker.setAnimation(BMAP_ANIMATION_BOUNCE); //跳动的动画
+        marker.addEventListener(&quot;click&quot;, function(e){
+            searchInfoWindow.open(marker);
+        });
+        //创建检索信息窗口对象
+        var searchInfoWindow = null;
+        searchInfoWindow = new BMapLib.SearchInfoWindow(map, &apos;&lt;div style=&quot;margin:0;line-height:20px;padding:2px;&quot;&gt;&apos;+rs.address+&apos;&lt;/div&gt;&apos; , {
+                title  : &quot;当前定位位置&quot;,      //标题
+                width  : 290,             //宽度
+                height : 105,              //高度
+                panel  : &quot;panel&quot;,         //检索结果面板
+                enableAutoPan : true,     //自动平移
+                searchTypes   :[
+                    BMAPLIB_TAB_SEARCH,   //周边检索
+                    BMAPLIB_TAB_TO_HERE,  //到这里去
+                    BMAPLIB_TAB_FROM_HERE //从这里出发
+                ]
+            });
+        searchInfoWindow.open(marker);//自动展示搜索结果
+         },mOption); 
+});
+geolocationControl.addEventListener(&quot;locationError&quot;,function(e){
+// 定位失败事件
+alert(e.message);
+});
+map.addControl(geolocationControl);
+///后方用到的变量----------------------------
+var myGeo = new BMap.Geocoder();   //构建一个地址解析器,用于获取站点信息和周围的poi,用于22
+//1111111111111111开启关闭标注点函数
+var pointarr=new Array();
+var pointcount=0;
+var marknarr=new Array();
+var contentarr=new Array();
+var mOption = {
+    poiRadius : 100,           //半径为r米内的POI,
+    numPois : 1             //最多只有12个 系统决定的
 }
-r = requests.get(url=real_play_addr_nowm, headers=headers, stream=True)
-
-# 下载视频
-today=datetime.datetime.now().strftime(&apos;%Y-%m-%d&apos;)
-if not os.path.exists(&apos;./{}&apos;.format(today)):
-    os.mkdir(&apos;./{}&apos;.format(today))
-
-with open(&apos;./{}/{}.mp4&apos;.format(today, playname), &quot;wb&quot;) as mp4:
-    for chunk in r.iter_content(chunk_size=1024 * 1024):
-        if chunk:
-            mp4.write(chunk)
-
-print(&quot;第%d个下载成功&quot;%count)
-
-if __name__ == &apos;__main__&apos;:
-count=1
-# 单个视频分享页————下载无水印视频
-urls=input(&apos;请输入多个链接（可以带汉字）:&apos;)
-video_list = re.findall(r&apos;(http.*?) &apos;, urls)
-
-
-for j in video_list:
-    download_video(j,count)
-    count=count+1;</code></pre><p>实现界面：<a href="https://blog.csdn.net/Python_sn/article/details/109358372?ops_request_misc=%257B%2522request%255Fid%2522%253A%2522160497764019725266900315%2522%252C%2522scm%2522%253A%252220140713.130102334.pc%255Fblog.%2522%257D&request_id=160497764019725266900315&biz_id=0&utm_medium=distribute.pc_search_result.none-task-blog-2~blog~first_rank_v1~rank_blog_v1-6-109358372.pc_v1_rank_blog_v1&utm_term=%E6%8A%96%E9%9F%B3&spm=1018.2118.3001.4450" target="_blank" rel="noopener">参考博客1</a><br><img src="https://i.loli.net/2020/11/10/GrwdfqoxF56LmbW.jpg" alt="实现界面.jpg"><br><strong>二：下载用户主页全部视频</strong><br>修改第二个下载抖音用户全部视频，由原来用户输入sec_id变成了用户直接输入主页链接就可以了，原来输入sec_id情况，对于没有爬虫和网页基础的人很难找到sec_id。不过原博就存在一个问题，其实并不是下载全部视频，大约三十个左右。分析了一遍代码也没找到哪里的问题，估计是抖音用特殊方法处理了。<br>实现代码：</p>
-<pre><code>import os, sys, requests
-import json, re, time
-from retrying import retry
-from contextlib import closing
-class DouYin: 
-def __init__(self):
-    self.headers = {
-        &apos;accept&apos;: &apos;text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9&apos;,
-        &apos;accept-language&apos;: &apos;zh-CN,zh;q=0.9,en;q=0.8&apos;,
-        &apos;pragma&apos;: &apos;no-cache&apos;,
-        &apos;cache-control&apos;: &apos;no-cache&apos;,
-        &apos;upgrade-insecure-requests&apos;: &apos;1&apos;,
-        &apos;User-Agent&apos;: &apos;Mozilla/5.0 (iPhone; CPU iPhone OS 13_2_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.3 Mobile/15E148 Safari/604.1&apos;,
+function showmark(){
+for(i=0;i&lt;pointcount;i++)
+{
+    map.addOverlay(marknarr[i]);
+}
+}
+function makerlisten(e){    //地图标注点监听事件
+    pointarr[pointcount]=e.point;
+    myGeo.getLocation(e.point,function mCallback(rs){
+    marknarr[pointcount]=new BMap.Marker(pointarr[pointcount]); 
+    marknarr[pointcount].addEventListener(&quot;click&quot;, function(e){
+    var searchInfoWindow = null;
+    searchInfoWindow = new BMapLib.SearchInfoWindow(map, &apos;&lt;div style=&quot;margin:0;line-height:20px;padding:2px;&quot;&gt;&apos;+rs.address+&apos;&lt;/div&gt;&apos;, {
+        title  : &quot;地址&quot;,      //标题
+        width  : 290,             //宽度
+        height : 60,              //高度
+        panel  : &quot;panel&quot;,         //检索结果面板
+        enableAutoPan : true,     //自动平移
+        searchTypes   :[
+            BMAPLIB_TAB_SEARCH,   //周边检索
+            BMAPLIB_TAB_TO_HERE,  //到这里去
+            BMAPLIB_TAB_FROM_HERE //从这里出发
+        ]
+    });
+    searchInfoWindow.open(e.point);
+});
+    pointcount++;
+    showmark();
+    },mOption);     
+}
+var buttonbol=1;
+function button1(){
+if(buttonbol==1){
+    map.addEventListener(&quot;click&quot;,makerlisten);
+    buttonbol=0;
+}
+    else{
+        map.removeEventListener(&quot;click&quot;,makerlisten);
+        buttonbol=1;
     }
+}
+function button2(){
+map.clearOverlays();
+pointcount=0;
+}
+//-----------------------3
+var localSearch = new BMap.LocalSearch(map);
+localSearch.enableAutoViewport(); //根据搜索结果自动调节窗体大小   
+function searchByStationName() {
+    map.clearOverlays();//清空原来的标注
+    var keyword = document.getElementById(&quot;keyword&quot;).value;
+     localSearch.setSearchCompleteCallback(function (searchResult) {
+        var poi = searchResult.getPoi(0);
+        console.log(poi.point);
+        //document.getElementById(&quot;jingweidu&quot;).value = poi.point.lng + &quot;,&quot; + poi.point.lat;
+        map.centerAndZoom(poi.point, 13);
+        map.enableScrollWheelZoom();
+        myGeo.getLocation(poi.point,function mCallback(rs){
+        var marker = new BMap.Marker(new BMap.Point(poi.point.lng, poi.point.lat));  // 创建标注，为要查询的地方对应的经纬度
+        map.addOverlay(marker);
+        marker.setAnimation(BMAP_ANIMATION_BOUNCE); //跳动的动画
+        marker.addEventListener(&quot;click&quot;, function(e){
+            searchInfoWindow.open(marker);
+        });
+        //创建检索信息窗口对象
+        var searchInfoWindow = null;
+        searchInfoWindow = new BMapLib.SearchInfoWindow(map, &apos;&lt;div style=&quot;margin:0;line-height:20px;padding:2px;&quot;&gt;&apos;+rs.address+&apos;&lt;/div&gt;&apos; , {
+                title  : keyword,      //标题
+                width  : 290,             //宽度
+                height : 105,              //高度
+                panel  : &quot;panel&quot;,         //检索结果面板
+                enableAutoPan : true,     //自动平移
+                searchTypes   :[
+                    BMAPLIB_TAB_SEARCH,   //周边检索
+                    BMAPLIB_TAB_TO_HERE,  //到这里去
+                    BMAPLIB_TAB_FROM_HERE //从这里出发
+                ]
+            });
+        searchInfoWindow.open(marker);//自动展示搜索结果
+         },mOption); 
+    });
+    localSearch.search(keyword);
 
-def hello(self):
-    &apos;&apos;&apos;
-    This is welcome speech
-    :return: self
-    &apos;&apos;&apos;
-    print(&quot;*&quot; * 50)
-    print(&apos; &apos; * 15 + &apos;抖音下载小助手&apos;)
-    print(&apos; &apos; * 5 + &apos;作者: Felix  Date: 2020-05-20 13:14&apos;)
-    print(&apos; &apos; * 15 + &apos;无水印 | 有水印&apos;)
-    print(&apos; &apos; * 12 + &apos;输入用户主页链接即可&apos;)
-    print(&apos; &apos; * 2 + &apos;用浏览器打开用户分享链接，复制参数中sec_uid&apos;)
-    print(&quot;*&quot; * 50)
-    return self
-
-def get_video_urls(self, sec_uid, type_flag=&apos;p&apos;):
-    &apos;&apos;&apos;
-    Get the video link of user
-    :param type_flag: the type of video
-    :return: nickname, video_list
-    &apos;&apos;&apos;
-    user_url_prefix = &apos;https://www.iesdouyin.com/web/api/v2/aweme/post&apos; if type_flag == &apos;p&apos; else &apos;https://www.iesdouyin.com/web/api/v2/aweme/like&apos;
-    print(&apos;---解析视频链接中...\r&apos;)
-
-    i = 0
-    result = []
-    while result == []:
-        i = i + 1
-        print(&apos;---正在第 {} 次尝试...\r&apos;.format(str(i)))
-        user_url = user_url_prefix + &apos;/?sec_uid=%s&amp;count=2000&apos; % (sec_uid)
-        response = self.get_request(user_url)
-        html = json.loads(response.content.decode())
-
-        if html[&apos;aweme_list&apos;] != []:
-
-            result = html[&apos;aweme_list&apos;]
-
-    nickname = None
-    video_list = []
-    for item in result:
-        if nickname is None:
-            nickname = item[&apos;author&apos;][&apos;nickname&apos;] if re.sub(r&apos;[\/:*?&quot;&lt;&gt;|]&apos;, &apos;&apos;, item[&apos;author&apos;][&apos;nickname&apos;]) else None
-
-        video_list.append({
-            &apos;desc&apos;: re.sub(r&apos;[\/:*?&quot;&lt;&gt;|]&apos;, &apos;&apos;, item[&apos;desc&apos;]) if item[&apos;desc&apos;] else &apos;无标题&apos; + str(int(time.time())),
-            &apos;url&apos;: item[&apos;video&apos;][&apos;play_addr&apos;][&apos;url_list&apos;][0]
-        })
-    return nickname, video_list
-
-def get_download_url(self, video_url, watermark_flag):
-    &apos;&apos;&apos;
-    Whether to download watermarked videos
-    :param video_url: the url of video
-    :param watermark_flag: the type of video
-    :return: the url of o
-    &apos;&apos;&apos;
-    if watermark_flag == True:
-        download_url = video_url.replace(&apos;api.amemv.com&apos;, &apos;aweme.snssdk.com&apos;)
-    else:
-        download_url = video_url.replace(&apos;aweme.snssdk.com&apos;, &apos;api.amemv.com&apos;)
-
-    return download_url
-
-def video_downloader(self, video_url, video_name, watermark_flag=False):
-    &apos;&apos;&apos;
-    Download the video
-    :param video_url: the url of video
-    :param video_name: the name of video
-    :param watermark_flag: the flag of video
-    :return: None
-    &apos;&apos;&apos;
-    size = 0
-    video_url = self.get_download_url(video_url, watermark_flag=watermark_flag)
-    with closing(requests.get(video_url, headers=self.headers, stream=True)) as response:
-        chunk_size = 1024
-        content_size = int(response.headers[&apos;content-length&apos;])
-        if response.status_code == 200:
-            sys.stdout.write(&apos;----[文件大小]:%0.2f MB\n&apos; % (content_size / chunk_size / 1024))
-
-            with open(video_name + &apos;.mp4&apos;, &apos;wb&apos;) as file:
-                for data in response.iter_content(chunk_size=chunk_size):
-                    file.write(data)
-                    size += len(data)
-                    file.flush()
-
-                    sys.stdout.write(&apos;----[下载进度]:%.2f%%&apos; % float(size / content_size * 100) + &apos;\r&apos;)
-                    sys.stdout.flush()
-
-@retry(stop_max_attempt_number=3)
-def get_request(self, url, params=None):
-    &apos;&apos;&apos;
-    Send a get request
-    :param url: the url of request
-    :param params: the params of request
-    :return: the result of request
-    &apos;&apos;&apos;
-    if params is None:
-        params = {}
-    response = requests.get(url, params=params, headers=self.headers, timeout=10)
-    assert response.status_code == 200
-    return response
-
-@retry(stop_max_attempt_number=3)
-def post_request(self, url, data=None):
-    &apos;&apos;&apos;
-    Send a post request
-    :param url: the url of request
-    :param data: the params of request
-    :return: the result of request
-    &apos;&apos;&apos;
-    if data is None:
-        data = {}
-    response = requests.post(url, data=data, headers=self.headers, timeout=10)
-    assert response.status_code == 200
-    return response
-
-def run(self):
-    &apos;&apos;&apos;
-    Program entry
-    &apos;&apos;&apos;
-    urls=input(&apos;请输入用户主页链接（可以带汉字）:&apos;)
-    video_list = re.findall(r&apos;(https://v.douyin.com/.*?/)&apos;, urls)[0]
-    headers = {&apos;user-agent&apos;: &apos;Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/63.0.3239.26 Safari/537.36 Core/1.63.5558.400 QQBrowser/10.1.1695.400&apos;, }
-    response = requests.get(url=video_list, headers=headers, allow_redirects=False)
-    sec_uid = re.findall(r&apos;uid=(.*?)&amp;&apos;, response.headers[&apos;location&apos;])[0]
-    sec_uid = sec_uid if sec_uid else &apos;MS4wLjABAAAAle_oORaZCgYlB84cLTKSqRFvDgGmgrJsS6n3TfwxonM&apos;
-
-    watermark_flag = input(&apos;是否下载带水印的视频 (0-否(默认), 1-是):&apos;)
-    watermark_flag = bool(int(watermark_flag)) if watermark_flag else 0
-
-    type_flag = input(&apos;p-上传的(默认), l-收藏的:&apos;)
-    type_flag = type_flag if type_flag else &apos;p&apos;
-
-    save_dir = input(&apos;保存路径 (默认&quot;./Download/&quot;):&apos;)
-    save_dir = save_dir if save_dir else &quot;./Download/&quot;
-
-    nickname, video_list = self.get_video_urls(sec_uid, type_flag)
-    nickname_dir = os.path.join(save_dir, nickname)
-
-    if not os.path.exists(nickname_dir):
-        os.makedirs(nickname_dir)
-
-    if type_flag == &apos;f&apos;:
-        if &apos;favorite&apos; not in os.listdir(nickname_dir):
-            os.mkdir(os.path.join(nickname_dir, &apos;favorite&apos;))
-
-    print(&apos;---视频下载中: 共有%d个作品...\r&apos; % len(video_list))
-
-    for num in range(len(video_list)):
-        print(&apos;---正在解析第%d个视频链接 [%s] 中，请稍后...\n&apos; % (num + 1, video_list[num][&apos;desc&apos;]))
-
-        video_path = os.path.join(nickname_dir, video_list[num][&apos;desc&apos;]) if type_flag != &apos;f&apos; else os.path.join(nickname_dir, &apos;favorite&apos;, video_list[num][&apos;desc&apos;])
-        if os.path.isfile(video_path):
-            print(&apos;---视频已存在...\r&apos;)
-        else:
-            self.video_downloader(video_list[num][&apos;url&apos;], video_path, watermark_flag)
-        print(&apos;\n&apos;)
-    print(&apos;---下载完成...\r&apos;)
-
-if __name__ == &quot;__main__&quot;:
-DouYin().hello().run()</code></pre><p>实现界面：<a href="https://blog.csdn.net/Python_sn/article/details/108951267" target="_blank" rel="noopener">参考博客2</a><br><img src="https://i.loli.net/2020/11/10/KlSI1tmCvDN7w4s.jpg" alt="实现界面2.jpg"></p>
-<hr>
-<p><strong>结：</strong><br>&emsp;&emsp;基本完成任务，不过由于时间学习不足，只搞懂了第一个爬虫原理和实现方法，第二个也只是浅显的理解小部分方法的实现，在本学期学了机器学习这门课加之此次爬虫经历，python这门语言确实方便和深厚，不枉有人来这么一句“python是世界上最好的语言”。下次更博不知道什么时候，不过估计更新的通过JavaScript实现最短路径导航，算法的期末作业。</p>
- 
+}
+//显示流量
+ var ctrl = new BMapLib.TrafficControl({
+    showPanel: false //是否显示路况提示面板
+});      
+map.addControl(ctrl);
+ctrl.setAnchor(BMAP_ANCHOR_BOTTOM_RIGHT); 
+//------起始点和终点路径
+//三种驾车策略：最少时间，最短距离，避开高速
+var routePolicy = [BMAP_DRIVING_POLICY_LEAST_TIME,BMAP_DRIVING_POLICY_LEAST_DISTANCE,BMAP_DRIVING_POLICY_AVOID_HIGHWAYS];
+$(&quot;#result&quot;).click(function(){
+    var start = document.getElementById(&quot;start1&quot;).value;
+    var end = document.getElementById(&quot;end1&quot;).value;
+    map.clearOverlays(); 
+    var i=$(&quot;#driving_way select&quot;).val();
+    search(start,end,routePolicy[i]); 
+    function search(start,end,route){ 
+        var driving = new BMap.DrivingRoute(map, {renderOptions:{map: map, autoViewport: true},policy: route});
+        driving.search(start,end);
+    }
+    //
+    var output = start+&quot;到&quot;+end+&quot;驾车需要&quot;;
+    var searchComplete = function (results){
+        if (transit.getStatus() != BMAP_STATUS_SUCCESS){
+            return ;
+        }
+        var plan = results.getPlan(0);
+        output += plan.getDuration(true) + &quot;\n&quot;;                //获取时间
+        output += &quot;总路程为：&quot; ;
+        output += plan.getDistance(true) + &quot;\n&quot;;             //获取距离
+    }
+    var transit = new BMap.DrivingRoute(map, {renderOptions: {map: map},
+        onSearchComplete: searchComplete,
+        onPolylinesSet: function(){        
+            setTimeout(function(){alert(output)},&quot;1000&quot;);
+    }});
+    transit.search(start, end);
+    //
+});
+///----------------步行和公交
+$(&quot;#walk&quot;).click(function(){
+    map.clearOverlays();
+    var start = document.getElementById(&quot;start1&quot;).value;
+    var end = document.getElementById(&quot;end1&quot;).value;
+    var walking = new BMap.WalkingRoute(map, {renderOptions:{map: map, autoViewport: true}});
+    walking.search(start, end);
+});
+$(&quot;#bus&quot;).click(function(){
+var routePolicy = [BMAP_TRANSIT_POLICY_LEAST_TIME,BMAP_TRANSIT_POLICY_LEAST_TRANSFER,BMAP_TRANSIT_POLICY_LEAST_WALKING,BMAP_TRANSIT_POLICY_AVOID_SUBWAYS];
+var transit = new BMap.TransitRoute(map, {
+        renderOptions: {map: map},
+        policy: 0
+    });
+map.clearOverlays();
+    var start = document.getElementById(&quot;start1&quot;).value;
+    var end = document.getElementById(&quot;end1&quot;).value;
+    var walking = new BMap.WalkingRoute(map, {renderOptions:{map: map, autoViewport: true}});
+    walking.search(start, end);
+    var i=$(&quot;#driving_way1 select&quot;).val();
+    search(start,end,routePolicy[i]); 
+    function search(start,end,route){ 
+        transit.setPolicy(route);
+        transit.search(start,end);
+    }
+    //时间和路程
+    var output = start+&quot;到&quot;+end+&quot;驾车需要&quot;;;
+    var transit = new BMap.TransitRoute(map,{
+        renderOptions: {map: map},
+        onSearchComplete: function(results){
+            if (transit.getStatus() != BMAP_STATUS_SUCCESS){
+                return ;
+            }
+            var plan = results.getPlan(0);
+            output += &apos;总时长：&apos; + plan.getDuration(true);  //获取时间
+            output += &apos;总路程：&apos; + plan.getDistance(true);  //获取距离
+            alert(output);
+        },
+    });
+    transit.search(start, end);
+});
+&lt;/script&gt;  
+&lt;/body&gt;  
+&lt;/html&gt;</code></pre> 
       <!-- reward -->
       
       <div id="reword-out">
@@ -415,12 +465,12 @@ DouYin().hello().run()</code></pre><p>实现界面：<a href="https://blog.csdn.
     <a class="modal-close" href="javascript:;"><i class="ri-close-circle-line"></i></a>
     <p>扫一扫，分享到微信</p>
     <div class="wx-qrcode">
-      <img src="//api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://youthfuever.github.io/2020/11/10/%E7%88%AC%E8%99%AB%E6%89%B9%E9%87%8F%E4%B8%8B%E8%BD%BD%E6%97%A0%E6%B0%B4%E5%8D%B0%E6%8A%96%E9%9F%B3%E8%A7%86%E9%A2%91%E5%92%8C%E7%94%A8%E6%88%B7%E4%B8%BB%E9%A1%B5%E5%85%A8%E9%83%A8%E8%A7%86%E9%A2%91/" alt="微信分享二维码">
+      <img src="//api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://youthfuever.github.io/2020/12/14/%E5%89%8D%E7%AB%AF%EF%BC%9A%E4%BD%BF%E7%94%A8%E7%99%BE%E5%BA%A6%E5%9C%B0%E5%9B%BEapi-%E5%AE%9E%E7%8E%B0%E4%B8%80%E4%BA%9B%E5%8A%9F%E8%83%BD%EF%BC%8C%E7%AE%80%E5%8D%95%E8%B0%83%E7%94%A8/" alt="微信分享二维码">
     </div>
 </div>
 
 <div id="share-mask"></div>  
-  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/python/" rel="tag">python</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E7%88%AC%E8%99%AB/" rel="tag">爬虫</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E8%87%AA%E5%AA%92%E4%BD%93/" rel="tag">自媒体</a></li></ul>
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/JavaScript/" rel="tag">JavaScript</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E5%89%8D%E7%AB%AF/" rel="tag">前端</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E7%99%BE%E5%BA%A6%E5%9C%B0%E5%9B%BEapi/" rel="tag">百度地图api</a></li></ul>
 
     </footer>
   </div>
@@ -428,19 +478,19 @@ DouYin().hello().run()</code></pre><p>实现界面：<a href="https://blog.csdn.
    
   <nav class="article-nav">
     
-      <a href="/2020/12/14/%E6%B1%87%E7%BC%96%E8%AF%AD%E8%A8%80%EF%BC%9A%E5%BE%AA%E7%8E%AF%E7%A8%8B%E5%BA%8F%E8%AE%BE%E8%AE%A1/" class="article-nav-link">
+      <a href="/2020/12/14/%E7%AE%97%E6%B3%95%EF%BC%9A%E8%B0%83%E7%94%A8%E7%99%BE%E5%BA%A6%E5%9C%B0%E5%9B%BEapi%E4%BD%BF%E7%94%A8Dijkstra%E7%A1%AE%E5%AE%9A%E6%9C%80%E7%9F%AD%E8%B7%AF%E5%BE%84/" class="article-nav-link">
         <strong class="article-nav-caption">上一篇</strong>
         <div class="article-nav-title">
           
-            汇编语言：循环程序设计
+            算法：调用百度地图api使用Dijkstra确定最短路径（二）
           
         </div>
       </a>
     
     
-      <a href="/2020/10/26/%E7%AC%AC%E4%B8%80%E7%AF%87%E5%8D%9A%E5%AE%A2/" class="article-nav-link">
+      <a href="/2020/12/14/%E6%B1%87%E7%BC%96%E8%AF%AD%E8%A8%80%EF%BC%9A%E5%BE%AA%E7%8E%AF%E7%A8%8B%E5%BA%8F%E8%AE%BE%E8%AE%A1/" class="article-nav-link">
         <strong class="article-nav-caption">下一篇</strong>
-        <div class="article-nav-title">第一篇博客</div>
+        <div class="article-nav-title">汇编语言：循环程序设计</div>
       </a>
     
   </nav>

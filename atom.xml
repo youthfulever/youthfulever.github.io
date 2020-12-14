@@ -6,7 +6,7 @@
   <link href="https://youthfuever.github.io/atom.xml" rel="self"/>
   
   <link href="https://youthfuever.github.io/"/>
-  <updated>2020-11-10T06:44:23.986Z</updated>
+  <updated>2020-12-14T15:39:08.227Z</updated>
   <id>https://youthfuever.github.io/</id>
   
   <author>
@@ -15,6 +15,96 @@
   </author>
   
   <generator uri="https://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>记录第一次的博客的关于我模块</title>
+    <link href="https://youthfuever.github.io/2020/12/14/%E8%AE%B0%E5%BD%95%E7%AC%AC%E4%B8%80%E6%AC%A1%E7%9A%84%E5%8D%9A%E5%AE%A2%E7%9A%84%E5%85%B3%E4%BA%8E%E6%88%91%E6%A8%A1%E5%9D%97/"/>
+    <id>https://youthfuever.github.io/2020/12/14/%E8%AE%B0%E5%BD%95%E7%AC%AC%E4%B8%80%E6%AC%A1%E7%9A%84%E5%8D%9A%E5%AE%A2%E7%9A%84%E5%85%B3%E4%BA%8E%E6%88%91%E6%A8%A1%E5%9D%97/</id>
+    <published>2020-12-14T15:26:59.000Z</published>
+    <updated>2020-12-14T15:39:08.227Z</updated>
+    
+    
+      
+      
+        
+        
+    <summary type="html">&lt;link rel=&quot;stylesheet&quot; class=&quot;aplayer-secondary-style-marker&quot; href=&quot;\assets\css\APlayer.min.css&quot;&gt;&lt;script src=&quot;\assets\js\APlayer.min.js&quot;</summary>
+        
+      
+    
+    
+    
+    <category term="博客" scheme="https://youthfuever.github.io/categories/%E5%8D%9A%E5%AE%A2/"/>
+    
+    
+    <category term="博客" scheme="https://youthfuever.github.io/tags/%E5%8D%9A%E5%AE%A2/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>算法：调用百度地图api使用Dijkstra确定最短路径（二）</title>
+    <link href="https://youthfuever.github.io/2020/12/14/%E7%AE%97%E6%B3%95%EF%BC%9A%E8%B0%83%E7%94%A8%E7%99%BE%E5%BA%A6%E5%9C%B0%E5%9B%BEapi%E4%BD%BF%E7%94%A8Dijkstra%E7%A1%AE%E5%AE%9A%E6%9C%80%E7%9F%AD%E8%B7%AF%E5%BE%84/"/>
+    <id>https://youthfuever.github.io/2020/12/14/%E7%AE%97%E6%B3%95%EF%BC%9A%E8%B0%83%E7%94%A8%E7%99%BE%E5%BA%A6%E5%9C%B0%E5%9B%BEapi%E4%BD%BF%E7%94%A8Dijkstra%E7%A1%AE%E5%AE%9A%E6%9C%80%E7%9F%AD%E8%B7%AF%E5%BE%84/</id>
+    <published>2020-12-14T15:15:32.000Z</published>
+    <updated>2020-12-14T15:25:21.870Z</updated>
+    
+    
+    <summary type="html">&lt;p&gt;算法设计与分析课程，调用百度地图api使用Dijkstra确定最短路径，由于前一个网页没使用到算法，毕竟是算法课程，所以又补了一个页面。</summary>
+    
+    
+    
+    <category term="算法" scheme="https://youthfuever.github.io/categories/%E7%AE%97%E6%B3%95/"/>
+    
+    
+    <category term="前端" scheme="https://youthfuever.github.io/tags/%E5%89%8D%E7%AB%AF/"/>
+    
+    <category term="百度地图api" scheme="https://youthfuever.github.io/tags/%E7%99%BE%E5%BA%A6%E5%9C%B0%E5%9B%BEapi/"/>
+    
+    <category term="算法" scheme="https://youthfuever.github.io/tags/%E7%AE%97%E6%B3%95/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>前端：使用百度地图api,实现一些功能，简单调用（一）</title>
+    <link href="https://youthfuever.github.io/2020/12/14/%E5%89%8D%E7%AB%AF%EF%BC%9A%E4%BD%BF%E7%94%A8%E7%99%BE%E5%BA%A6%E5%9C%B0%E5%9B%BEapi-%E5%AE%9E%E7%8E%B0%E4%B8%80%E4%BA%9B%E5%8A%9F%E8%83%BD%EF%BC%8C%E7%AE%80%E5%8D%95%E8%B0%83%E7%94%A8/"/>
+    <id>https://youthfuever.github.io/2020/12/14/%E5%89%8D%E7%AB%AF%EF%BC%9A%E4%BD%BF%E7%94%A8%E7%99%BE%E5%BA%A6%E5%9C%B0%E5%9B%BEapi-%E5%AE%9E%E7%8E%B0%E4%B8%80%E4%BA%9B%E5%8A%9F%E8%83%BD%EF%BC%8C%E7%AE%80%E5%8D%95%E8%B0%83%E7%94%A8/</id>
+    <published>2020-12-14T15:02:49.000Z</published>
+    <updated>2020-12-14T15:16:28.737Z</updated>
+    
+    
+    <summary type="html">&lt;p&gt;算法设计与分析课程，实现如下大部分功能，基本都实现了，有需要的可以自己试验一下，不过未使用算法，编写算法确定最短路径看下一篇文章</summary>
+    
+    
+    
+    <category term="前端" scheme="https://youthfuever.github.io/categories/%E5%89%8D%E7%AB%AF/"/>
+    
+    
+    <category term="前端" scheme="https://youthfuever.github.io/tags/%E5%89%8D%E7%AB%AF/"/>
+    
+    <category term="JavaScript" scheme="https://youthfuever.github.io/tags/JavaScript/"/>
+    
+    <category term="百度地图api" scheme="https://youthfuever.github.io/tags/%E7%99%BE%E5%BA%A6%E5%9C%B0%E5%9B%BEapi/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>汇编语言：循环程序设计</title>
+    <link href="https://youthfuever.github.io/2020/12/14/%E6%B1%87%E7%BC%96%E8%AF%AD%E8%A8%80%EF%BC%9A%E5%BE%AA%E7%8E%AF%E7%A8%8B%E5%BA%8F%E8%AE%BE%E8%AE%A1/"/>
+    <id>https://youthfuever.github.io/2020/12/14/%E6%B1%87%E7%BC%96%E8%AF%AD%E8%A8%80%EF%BC%9A%E5%BE%AA%E7%8E%AF%E7%A8%8B%E5%BA%8F%E8%AE%BE%E8%AE%A1/</id>
+    <published>2020-12-14T14:39:15.000Z</published>
+    <updated>2020-12-14T15:01:04.272Z</updated>
+    
+    
+    <summary type="html">&lt;p&gt;&amp;emsp;&amp;emsp;编写一个汇编语言循环程序时遇到问题，最后还是在老师帮助下解决，在网上查这个题也查不到，那我就发一下吧，万一有人看呢。</summary>
+    
+    
+    
+    <category term="汇编语言" scheme="https://youthfuever.github.io/categories/%E6%B1%87%E7%BC%96%E8%AF%AD%E8%A8%80/"/>
+    
+    
+    <category term="汇编语言" scheme="https://youthfuever.github.io/tags/%E6%B1%87%E7%BC%96%E8%AF%AD%E8%A8%80/"/>
+    
+  </entry>
   
   <entry>
     <title>爬虫批量下载无水印抖音视频和用户主页全部视频</title>
@@ -44,10 +134,10 @@
     <link href="https://youthfuever.github.io/2020/10/26/%E7%AC%AC%E4%B8%80%E7%AF%87%E5%8D%9A%E5%AE%A2/"/>
     <id>https://youthfuever.github.io/2020/10/26/%E7%AC%AC%E4%B8%80%E7%AF%87%E5%8D%9A%E5%AE%A2/</id>
     <published>2020-10-26T09:59:02.000Z</published>
-    <updated>2020-11-10T06:44:25.728Z</updated>
+    <updated>2020-12-14T14:41:33.901Z</updated>
     
     
-    <summary type="html">&lt;p&gt;#　很早以前就搭建了本博客，当时仅采用hexo+github，然后博客加载速度很慢，就没再去管理，而后看到</summary>
+    <summary type="html">&lt;p&gt;很早以前就搭建了本博客，当时仅采用hexo+github，然后博客加载速度很慢，就没再去管理，而后看到</summary>
     
     
     
