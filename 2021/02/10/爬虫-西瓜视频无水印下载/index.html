@@ -13,7 +13,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
   <title>
-    记录博客的关于我模块第一版 |  晏然
+    爬虫_西瓜视频无水印下载 |  晏然
   </title>
   <meta name="generator" content="hexo-theme-ayer">
   
@@ -60,7 +60,7 @@
     <main class="content on">
       <section class="outer">
   <article
-  id="post-记录第一次的博客的关于我模块"
+  id="post-爬虫-西瓜视频无水印下载"
   class="article article-type-post"
   itemscope
   itemprop="blogPost"
@@ -71,18 +71,18 @@
     <header class="article-header">
        
 <h1 class="article-title sea-center" style="border-left:0" itemprop="name">
-  记录博客的关于我模块第一版
+  爬虫_西瓜视频无水印下载
 </h1>
  
 
     </header>
      
     <div class="article-meta">
-      <a href="/2020/12/14/%E8%AE%B0%E5%BD%95%E7%AC%AC%E4%B8%80%E6%AC%A1%E7%9A%84%E5%8D%9A%E5%AE%A2%E7%9A%84%E5%85%B3%E4%BA%8E%E6%88%91%E6%A8%A1%E5%9D%97/" class="article-date">
-  <time datetime="2020-12-14T15:26:59.000Z" itemprop="datePublished">2020-12-14</time>
+      <a href="/2021/02/10/%E7%88%AC%E8%99%AB-%E8%A5%BF%E7%93%9C%E8%A7%86%E9%A2%91%E6%97%A0%E6%B0%B4%E5%8D%B0%E4%B8%8B%E8%BD%BD/" class="article-date">
+  <time datetime="2021-02-10T03:14:20.000Z" itemprop="datePublished">2021-02-10</time>
 </a> 
   <div class="article-category">
-    <a class="article-category-link" href="/categories/%E5%8D%9A%E5%AE%A2/">博客</a>
+    <a class="article-category-link" href="/categories/%E7%88%AC%E8%99%AB/">爬虫</a>
   </div>
   
 <div class="word_count">
@@ -90,7 +90,7 @@
         <span class="post-meta-item-icon">
             <i class="ri-quill-pen-line"></i>
             <span class="post-meta-item-text"> 字数统计:</span>
-            <span class="post-count">183</span>
+            <span class="post-count">1k</span>
         </span>
     </span>
 
@@ -99,7 +99,7 @@
         <span class="post-meta-item-icon">
             <i class="ri-book-open-line"></i>
             <span class="post-meta-item-text"> 阅读时长≈</span>
-            <span class="post-count">1 分钟</span>
+            <span class="post-count">5 分钟</span>
         </span>
     </span>
 </div>
@@ -112,8 +112,111 @@
   
     <div class="article-entry" itemprop="articleBody">
        
-  <p>虽然搭建本博客也有一段时间，但ABOUT模块一直是空的，今天有空顺便也完善一下。计算机专业在读学生<a id="more"></a>，就读于山东某大学，一次偶然机会开创本博客，单纯用于记录编程学习过程，爱好自媒体，一个朴实无华的搬运工，QQ看点创作者，先阶段主要是刚开始了爬虫学习，下一目标深度的爬虫学习，自媒体方面学习剪辑，进行原创。通过本博客将遇到有意义的问题或者项目记录一下，不定期更新，现计划考研，可能更新频率会少一点。学习交流的话,可以QQ763584254。<br><img src="https://i.loli.net/2020/12/15/cLaCKdkewnYOWmb.gif" alt="wow.gif"></p>
- 
+  <p>&emsp;&emsp;通过西瓜视频分享视频链接，下载无水印视频。分析得到网页通过分别加载视频和音频实现展示，然后在源码中找到base64加密的两个URL字典，下载最后的就是最高清晰度，然后进行合并。<a id="more"></a><br>问题说明：需要下载用于音视频合并的软件ffmpeg，应该需要配置环境变量；还有我打包成exe以后，换到别的电脑好像不能下载了，都打包成exe还需要ffmpeg合并？<br>特色功能：下载进度动态展示</p>
+<pre><code>def show_downl(video_url,headers,name):
+    size=0
+    with closing(requests.get(video_url, headers=headers, stream=True)) as response:
+        chunk_size = 1024
+        content_size = int(response.headers[&apos;content-length&apos;])
+        if response.status_code == 200:
+            sys.stdout.write(&apos;----[文件大小]:%0.2f MB\n&apos; % (content_size / chunk_size / 1024))
+            with open(name, &apos;wb&apos;) as file:
+                for data in response.iter_content(chunk_size=chunk_size):
+                    file.write(data)
+                    size += len(data)
+                    file.flush()
+                    sys.stdout.write(&apos;----[下载进度]:%.2f%%&apos; % float(size / content_size * 100) + &apos;\r&apos;)
+                    sys.stdout.flush()</code></pre><p><img src="https://i.loli.net/2021/02/10/NGUw1uBVSx98gzX.jpg" alt="功能界面.jpg"><br>具体代码如下：</p>
+<pre><code>import requests
+import re
+import base64
+import subprocess
+import path
+import json
+import os
+from bs4 import BeautifulSoup
+from contextlib import closing
+import sys
+class XGSP:
+    video_headers = {
+        &apos;accept&apos;: &apos;*/*&apos;,
+        &apos;accept-encoding&apos;: &apos;gzip, deflate, br&apos;,
+        &apos;accept-language&apos;: &apos;zh-CN,zh;q=0.9,en;q=0.8,en-GB;q=0.7,en-US;q=0.6&apos;,
+        &apos;origin&apos;: &apos;https://www.ixigua.com&apos;,
+        &apos;referer&apos;: &apos;https://www.ixigua.com/&apos;,
+        &apos;sec-fetch-dest&apos;: &apos;empty&apos;,
+        &apos;sec-fetch-mode&apos;: &apos;cors&apos;,
+        &apos;sec-fetch-site&apos;: &apos;same-site&apos;,
+        &apos;user-agent&apos;: &apos;Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.88 Safari/537.36 Edg/87.0.664.57&apos;
+    }
+    main_headers={
+&apos;accept&apos;:&apos;text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8&apos;,
+&apos;accept-language&apos;:&apos;zh-CN,zh;q=0.9&apos;,
+&apos;cache-control&apos;:&apos;max-age=0&apos;,
+&apos;cookie&apos;:&apos;MONITOR_WEB_ID=94c30f86-f8f5-411d-b705-2902908ae423; ttwid=1%7CE-cVKYB8NING4oYcV9ly60t48MTYNfeExprsaKuREf8%7C1611561966%7Cce59db9dbddadc3f4841e85a5fe8a91c7d22de06e515435c7ae8bcfd9866b833; Hm_lvt_db8ae92f7b33b6596893cdf8c004a1a2=1610539323,1611406673,1611561969; Hm_lpvt_db8ae92f7b33b6596893cdf8c004a1a2=1611561969; _ga=GA1.2.1448257088.1611561971; _gid=GA1.2.597084694.1611561971; ixigua-a-s=1&apos;,
+&apos;referer&apos;:&apos;https://www.ixigua.com/6860850293756658184?id=6888652637810622988&amp;logTag=CMwnrB6dcTt_e3IAaRLke&apos;,
+&apos;upgrade-insecure-requests&apos;:&apos;1&apos;,
+&apos;user-agent&apos;:&apos;Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/63.0.3239.26 Safari/537.36 Core/1.63.5558.400 QQBrowser/10.1.1695.400&apos;}
+    def __init__(self, s_url):
+        self.url = s_url
+    def XGSP_download(self):
+        r = requests.get(self.url, headers=self.main_headers)
+        r.encoding = &apos;utf-8&apos;
+        bs=BeautifulSoup(r.text,&apos;html.parser&apos;)
+        video_name=bs.title.string.replace(&apos;- 西瓜视频&apos;,&apos;&apos;)
+        print(&apos;视频名：&apos;,video_name)
+        video_info = (re.findall(r&apos;dynamic_video_list&quot;:(.*?)]&apos;, r.text)[0]).replace(&apos;[&apos;,&apos;&apos;)
+        video_info = re.findall(r&apos;{.*?}&apos;, video_info)[-1]
+        video_json = json.loads(video_info)
+        video_url=base64.b64decode(video_json[&apos;main_url&apos;]).decode(&quot;utf-8&quot;)
+        audio_info = (re.findall(r&apos;dynamic_audio_list&quot;:(.*?)]&apos;, r.text)[0]).replace(&apos;[&apos;, &apos;&apos;)
+        audio_info = re.findall(r&apos;{.*?}&apos;, audio_info)[-1]
+        audio_json = json.loads(audio_info)
+        audio_url = base64.b64decode(audio_json[&apos;backup_url_1&apos;]).decode(&quot;utf-8&quot;)
+        if not os.path.exists(&apos;./西瓜视频下载/&apos;):
+            os.mkdir(&apos;./西瓜视频下载/&apos;)
+        print(&apos;音频正在下载...&apos;)
+        show_downl(audio_url, self.video_headers, &apos;mp3.flv&apos;)
+        print(&apos;视频正在下载...&apos;)
+        show_downl(video_url, self.video_headers, &apos;mp4.flv&apos;)
+        print(&quot;音视频均下载完成，开始拼接...&quot;)
+        pinjie(video_name)
+def show_downl(video_url,headers,name):
+    size=0
+    with closing(requests.get(video_url, headers=headers, stream=True)) as response:
+        chunk_size = 1024
+        content_size = int(response.headers[&apos;content-length&apos;])
+        if response.status_code == 200:
+            sys.stdout.write(&apos;----[文件大小]:%0.2f MB\n&apos; % (content_size / chunk_size / 1024))
+            with open(name, &apos;wb&apos;) as file:
+                for data in response.iter_content(chunk_size=chunk_size):
+                    file.write(data)
+                    size += len(data)
+                    file.flush()
+                    sys.stdout.write(&apos;----[下载进度]:%.2f%%&apos; % float(size / content_size * 100) + &apos;\r&apos;)
+                    sys.stdout.flush()
+def pinjie(name):
+    outfile_name=&apos;西瓜视频下载/&apos;+name.replace(&apos; &apos;,&apos;&apos;)+&apos;.mp4&apos;
+    file_name=&apos;mp4.flv&apos;
+    mp3_file=&apos;mp3.flv&apos;
+    cmd = f&apos;E:\\ffmpeg_124162\\ffmpeg-20200315-c467328-win64-static\\bin\\ffmpeg -i {mp3_file} -i {file_name} -acodec copy -vcodec copy {outfile_name}&apos;
+    subprocess.call(cmd,shell=True)
+    os.remove(file_name)
+    os.remove(mp3_file)
+    print(&apos;下载完成&apos;)
+if __name__ == &apos;__main__&apos;:
+    print(&quot;*&quot; * 50)
+    print(&apos; &apos; * 15 + &apos;西瓜视频无水印下载小助手&apos;)
+    print(&apos; &apos; * 8 + &apos;作者: 晏然  QQ: 763584254&apos;)
+    print(&quot;*&quot; * 50)
+    while True:
+        shrot_video_url=input(&quot;请输入西瓜视频链接：&quot;)
+        headers = {
+            &apos;user-agent&apos;: &apos;Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/63.0.3239.26 Safari/537.36 Core/1.63.5558.400 QQBrowser/10.1.1695.400&apos;, }
+        response = requests.get(url=shrot_video_url, headers=headers, allow_redirects=True)
+        url=response.url.replace(&apos;com/group/&apos;,&apos;com/&apos;)
+        xgsp = XGSP(url)
+        xgsp.XGSP_download()</code></pre> 
       <!-- reward -->
       
       <div id="reword-out">
@@ -183,12 +286,12 @@
     <a class="modal-close" href="javascript:;"><i class="ri-close-circle-line"></i></a>
     <p>扫一扫，分享到微信</p>
     <div class="wx-qrcode">
-      <img src="//api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://youthfuever.github.io/2020/12/14/%E8%AE%B0%E5%BD%95%E7%AC%AC%E4%B8%80%E6%AC%A1%E7%9A%84%E5%8D%9A%E5%AE%A2%E7%9A%84%E5%85%B3%E4%BA%8E%E6%88%91%E6%A8%A1%E5%9D%97/" alt="微信分享二维码">
+      <img src="//api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://youthfuever.github.io/2021/02/10/%E7%88%AC%E8%99%AB-%E8%A5%BF%E7%93%9C%E8%A7%86%E9%A2%91%E6%97%A0%E6%B0%B4%E5%8D%B0%E4%B8%8B%E8%BD%BD/" alt="微信分享二维码">
     </div>
 </div>
 
 <div id="share-mask"></div>  
-  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E5%8D%9A%E5%AE%A2/" rel="tag">博客</a></li></ul>
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/python/" rel="tag">python</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E7%88%AC%E8%99%AB/" rel="tag">爬虫</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E8%87%AA%E5%AA%92%E4%BD%93/" rel="tag">自媒体</a></li></ul>
 
     </footer>
   </div>
@@ -196,19 +299,10 @@
    
   <nav class="article-nav">
     
-      <a href="/2021/02/10/%E7%88%AC%E8%99%AB-%E8%A5%BF%E7%93%9C%E8%A7%86%E9%A2%91%E6%97%A0%E6%B0%B4%E5%8D%B0%E4%B8%8B%E8%BD%BD/" class="article-nav-link">
-        <strong class="article-nav-caption">上一篇</strong>
-        <div class="article-nav-title">
-          
-            爬虫_西瓜视频无水印下载
-          
-        </div>
-      </a>
     
-    
-      <a href="/2020/12/14/%E7%AE%97%E6%B3%95%EF%BC%9A%E8%B0%83%E7%94%A8%E7%99%BE%E5%BA%A6%E5%9C%B0%E5%9B%BEapi%E4%BD%BF%E7%94%A8Dijkstra%E7%A1%AE%E5%AE%9A%E6%9C%80%E7%9F%AD%E8%B7%AF%E5%BE%84/" class="article-nav-link">
+      <a href="/2020/12/14/%E8%AE%B0%E5%BD%95%E7%AC%AC%E4%B8%80%E6%AC%A1%E7%9A%84%E5%8D%9A%E5%AE%A2%E7%9A%84%E5%85%B3%E4%BA%8E%E6%88%91%E6%A8%A1%E5%9D%97/" class="article-nav-link">
         <strong class="article-nav-caption">下一篇</strong>
-        <div class="article-nav-title">算法：调用百度地图api使用Dijkstra确定最短路径（二）</div>
+        <div class="article-nav-title">记录博客的关于我模块第一版</div>
       </a>
     
   </nav>
