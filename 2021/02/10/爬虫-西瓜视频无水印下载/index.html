@@ -112,7 +112,9 @@
   
     <div class="article-entry" itemprop="articleBody">
        
-  <p>&emsp;&emsp;通过西瓜视频分享视频链接，下载无水印视频。分析得到网页通过分别加载视频和音频实现展示，然后在源码中找到base64加密的两个URL字典，下载最后的就是最高清晰度，然后进行合并。<a id="more"></a><br>问题说明：需要下载用于音视频合并的软件ffmpeg，应该需要配置环境变量；还有我打包成exe以后，换到别的电脑好像不能下载了，都打包成exe还需要ffmpeg合并？<br>特色功能：下载进度动态展示</p>
+  <p>&emsp;&emsp;通过西瓜视频分享视频链接，下载无水印视频。分析得到网页通过分别加载视频和音频实现展示，然后在源码中找到base64加密的两个URL字典，下载最后的就是最高清晰度，然后进行合并。<a id="more"></a></p>
+<p>问题说明：需要下载用于音视频合并的软件ffmpeg，应该需要配置环境变量；还有我打包成exe以后，换到别的电脑好像不能下载了，都打包成exe还需要ffmpeg合并？</p>
+<p>特色功能：下载进度动态展示</p>
 <pre><code>def show_downl(video_url,headers,name):
     size=0
     with closing(requests.get(video_url, headers=headers, stream=True)) as response:
@@ -126,7 +128,8 @@
                     size += len(data)
                     file.flush()
                     sys.stdout.write(&apos;----[下载进度]:%.2f%%&apos; % float(size / content_size * 100) + &apos;\r&apos;)
-                    sys.stdout.flush()</code></pre><p><img src="https://i.loli.net/2021/02/10/NGUw1uBVSx98gzX.jpg" alt="功能界面.jpg"><br>具体代码如下：</p>
+                    sys.stdout.flush()</code></pre><p>功能界面：<br><img src="https://i.loli.net/2021/02/10/wRYjm31SrUFP6te.jpg" alt="功能界面.jpg"></p>
+<p>具体代码如下：</p>
 <pre><code>import requests
 import re
 import base64
