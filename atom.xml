@@ -6,7 +6,7 @@
   <link href="https://youthfuever.github.io/atom.xml" rel="self"/>
   
   <link href="https://youthfuever.github.io/"/>
-  <updated>2021-02-10T03:48:22.233Z</updated>
+  <updated>2021-02-10T13:08:52.812Z</updated>
   <id>https://youthfuever.github.io/</id>
   
   <author>
@@ -21,7 +21,7 @@
     <link href="https://youthfuever.github.io/2021/02/10/%E7%88%AC%E8%99%AB-%E8%A5%BF%E7%93%9C%E8%A7%86%E9%A2%91%E6%97%A0%E6%B0%B4%E5%8D%B0%E4%B8%8B%E8%BD%BD/"/>
     <id>https://youthfuever.github.io/2021/02/10/%E7%88%AC%E8%99%AB-%E8%A5%BF%E7%93%9C%E8%A7%86%E9%A2%91%E6%97%A0%E6%B0%B4%E5%8D%B0%E4%B8%8B%E8%BD%BD/</id>
     <published>2021-02-10T03:14:20.000Z</published>
-    <updated>2021-02-10T03:48:22.233Z</updated>
+    <updated>2021-02-10T13:08:52.812Z</updated>
     
     
     <summary type="html">&lt;p&gt;&amp;emsp;&amp;emsp;通过西瓜视频分享视频链接，下载无水印视频。分析得到网页通过分别加载视频和音频实现展示，然后在源码中找到base64加密的两个URL字典，下载最后的就是最高清晰度，然后进行合并。</summary>
